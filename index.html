@@ -1,0 +1,2505 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Протокол совещания — ГИП ФОРМАТ</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f4f5f7; --surface:#fff; --surface2:#f9fafb;
+  --border:#e4e6ea; --border2:#d0d3d9;
+  --text:#1a1d23; --text2:#5a6072; --text3:#9ba3b4;
+  --accent:#2563eb; --accent-bg:#eff4ff; --accent-light:#dbeafe;
+  --red:#dc2626; --red-bg:#fef2f2;
+  --green:#16a34a; --green-bg:#f0fdf4;
+  --orange:#d97706; --orange-bg:#fffbeb;
+  --purple:#7c3aed; --purple-bg:#f5f3ff;
+  --stop-bg:#fff5f5; --stop-border:#fecaca;
+  --done-bg:#f8fafc; --done-text:#94a3b8;
+  --sidebar-w:264px;
+  --mono:'JetBrains Mono',monospace; --sans:'Inter',sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13px;line-height:1.5;min-height:100vh;display:flex;flex-direction:column;}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);height:52px;display:flex;align-items:center;padding:0 18px;gap:12px;position:sticky;top:0;z-index:200;flex-shrink:0;}
+.topbar-logo{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--accent);letter-spacing:.06em;white-space:nowrap;padding-right:14px;border-right:1px solid var(--border);}
+.topbar-proto{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+.proto-badge{background:var(--accent-bg);border:1px solid var(--accent-light);color:var(--accent);font-family:var(--mono);font-size:11px;padding:3px 10px;border-radius:4px;white-space:nowrap;}
+.proto-badge.locked{background:var(--green-bg);border-color:#bbf7d0;color:var(--green);}
+.proto-date{font-size:12px;color:var(--text2);white-space:nowrap;}
+.topbar-right{display:flex;align-items:center;gap:8px;margin-left:auto;flex-shrink:0;}
+.tbtn{display:flex;align-items:center;gap:5px;padding:6px 13px;border-radius:6px;font-family:var(--sans);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid;white-space:nowrap;}
+.tbtn-primary{background:var(--accent);border-color:var(--accent);color:#fff;}
+.tbtn-primary:hover{background:#1d4ed8;}
+.tbtn-locked{background:var(--green-bg);border-color:#bbf7d0;color:var(--green);}
+.tbtn-ghost{background:var(--bg);border-color:var(--border2);color:var(--text2);}
+.tbtn-ghost:hover{border-color:var(--text2);color:var(--text);}
+.tbtn-pdf{background:var(--orange-bg);border-color:#fed7aa;color:var(--orange);}
+.tbtn-pdf:hover{background:#ffedd5;}
+.search-wrap{position:relative;}
+.search-wrap input{background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--sans);font-size:12px;padding:6px 12px 6px 30px;width:190px;border-radius:6px;outline:none;transition:all .15s;}
+.search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
+.search-wrap input::placeholder{color:var(--text3);}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:13px;pointer-events:none;}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;min-height:0;}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);overflow-y:auto;position:sticky;top:52px;height:calc(100vh - 52px);}
+.sb-section{padding:10px 0 4px;}
+.sb-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);padding:0 14px 6px;display:block;}
+.sb-item{display:flex;align-items:center;gap:7px;padding:5px 14px;cursor:pointer;transition:background .1s;border-left:3px solid transparent;}
+.sb-item:hover{background:var(--bg);}
+.sb-item.active{background:var(--accent-bg);border-left-color:var(--accent);}
+.sb-item.active .si-name{color:var(--accent);font-weight:600;}
+.si-num{font-family:var(--mono);font-size:9px;color:var(--text3);min-width:20px;}
+.si-name{font-size:12px;color:var(--text2);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.si-stop{font-family:var(--mono);font-size:8px;background:var(--red-bg);color:var(--red);border:1px solid #fecaca;padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.si-cnt{font-family:var(--mono);font-size:9px;color:var(--text3);background:var(--bg);border:1px solid var(--border);padding:1px 5px;border-radius:10px;flex-shrink:0;}
+.si-cnt.red{background:var(--red-bg);border-color:#fecaca;color:var(--red);}
+.sb-add{display:flex;align-items:center;gap:7px;padding:7px 14px;cursor:pointer;color:var(--accent);font-size:12px;transition:background .1s;border-top:1px solid var(--border);margin-top:4px;}
+.sb-add:hover{background:var(--accent-bg);}
+.sb-div{height:1px;background:var(--border);margin:6px 0;}
+
+/* HISTORY PANEL */
+.history-panel{width:var(--sidebar-w);flex-shrink:0;background:var(--surface);border-left:1px solid var(--border);overflow-y:auto;position:sticky;top:52px;height:calc(100vh - 52px);}
+.hp-header{padding:12px 14px 10px;border-bottom:1px solid var(--border);}
+.hp-title{font-size:12px;font-weight:600;color:var(--text);}
+.hp-sub{font-size:11px;color:var(--text3);margin-top:2px;}
+.hp-item{padding:10px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;}
+.hp-item:hover{background:var(--bg);}
+.hp-num{font-family:var(--mono);font-size:11px;color:var(--accent);font-weight:500;}
+.hp-date{font-size:11px;color:var(--text2);margin-top:1px;}
+.hp-meta{font-size:10px;color:var(--text3);margin-top:2px;}
+.hp-empty{padding:20px 14px;color:var(--text3);font-size:12px;text-align:center;}
+
+/* MAIN */
+.main-area{flex:1;overflow-y:auto;padding:14px 18px;min-width:0;}
+
+/* FILTER BAR */
+.filter-bar{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.filter-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);white-space:nowrap;}
+.filter-chips{display:flex;gap:5px;flex-wrap:wrap;flex:1;}
+.chip{background:var(--bg);border:1px solid var(--border2);color:var(--text2);font-family:var(--sans);font-size:12px;padding:3px 11px;cursor:pointer;transition:all .12s;border-radius:20px;white-space:nowrap;}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500;}
+.chip.overdue-chip{border-color:#fecaca;color:var(--red);}
+.chip.overdue-chip:hover,.chip.overdue-chip.active{background:var(--red);border-color:var(--red);color:#fff;}
+
+/* STATS */
+.stats-row{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 13px;display:flex;align-items:center;gap:10px;flex:1;min-width:105px;cursor:default;}
+.stat-card.clickable{cursor:pointer;transition:all .15s;}
+.stat-card.clickable:hover{border-color:var(--red);box-shadow:0 0 0 3px var(--red-bg);}
+.stat-card.filter-active{border-color:var(--red);background:var(--red-bg);}
+.stat-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;}
+.si-blue{background:var(--accent-bg);}
+.si-red{background:var(--red-bg);}
+.si-orange{background:var(--orange-bg);}
+.si-gray{background:var(--bg);}
+.si-green{background:var(--green-bg);}
+.stat-val{font-family:var(--mono);font-size:17px;font-weight:500;color:var(--text);line-height:1.2;}
+.stat-lbl{font-size:11px;color:var(--text3);}
+
+/* LOCKED BANNER */
+.locked-banner{background:var(--green-bg);border:1px solid #bbf7d0;border-radius:8px;padding:9px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;font-size:12px;color:var(--green);}
+
+/* OBJECT CARD */
+.obj-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:7px;overflow:hidden;scroll-margin-top:14px;transition:box-shadow .15s;}
+.obj-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.05);}
+.obj-card.stop-mode{border-color:var(--stop-border);background:var(--stop-bg);}
+.obj-head{display:flex;align-items:center;gap:7px;padding:9px 13px;cursor:pointer;user-select:none;transition:background .1s;}
+.obj-head:hover{background:var(--surface2);}
+.obj-card.stop-mode .obj-head:hover{background:#fff0f0;}
+.obj-num{font-family:var(--mono);font-size:10px;color:var(--text3);min-width:22px;}
+.obj-name{font-weight:600;font-size:13px;color:var(--text);flex:1;}
+.role-badge{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:3px;border:1px solid;flex-shrink:0;white-space:nowrap;}
+.role-gip{background:var(--purple-bg);color:var(--purple);border-color:#ddd6fe;}
+.role-rp{background:var(--accent-bg);color:var(--accent);border-color:var(--accent-light);}
+.stop-badge{font-family:var(--mono);font-size:9px;background:var(--red-bg);color:var(--red);border:1px solid #fecaca;padding:2px 7px;border-radius:4px;}
+.overdue-badge{font-size:11px;color:var(--red);background:var(--red-bg);border:1px solid #fecaca;padding:2px 8px;border-radius:4px;white-space:nowrap;}
+.cnt-badge{font-family:var(--mono);font-size:10px;color:var(--text3);background:var(--bg);border:1px solid var(--border);padding:2px 8px;border-radius:10px;white-space:nowrap;}
+.chevron{color:var(--text3);font-size:10px;transition:transform .2s;flex-shrink:0;}
+.obj-card.collapsed .chevron{transform:rotate(-90deg);}
+.head-actions{display:flex;align-items:center;gap:5px;margin-left:2px;}
+.bha{background:none;border:1px solid var(--border2);color:var(--text3);font-size:11px;cursor:pointer;padding:2px 7px;border-radius:4px;transition:all .12s;white-space:nowrap;font-family:var(--sans);}
+.bha:hover{border-color:var(--border);color:var(--text2);}
+.bha.stop-on:hover{border-color:#fecaca;color:var(--red);background:var(--red-bg);}
+.bha.stop-off:hover{border-color:#bbf7d0;color:var(--green);background:var(--green-bg);}
+.bha.roles-btn:hover{border-color:#ddd6fe;color:var(--purple);background:var(--purple-bg);}
+
+/* TASKS TABLE */
+.tasks-body{overflow:hidden;}
+.obj-card.collapsed .tasks-body{display:none;}
+.tasks-table{width:100%;border-collapse:collapse;}
+.tasks-table th{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);padding:6px 10px;text-align:left;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--surface2);font-weight:400;}
+.tasks-table td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.tasks-table tr:last-child td{border-bottom:none;}
+.tasks-table tbody tr:not(.done-row):hover td{background:var(--surface2);}
+.obj-card.stop-mode .tasks-table tbody tr:not(.done-row):hover td{background:#fff0f0;}
+
+/* DONE ROW */
+.done-row td{background:var(--done-bg) !important;opacity:.65;}
+.done-row .td-task{text-decoration:line-through;color:var(--text3);}
+.done-row .td-who{color:var(--text3);}
+
+/* COLS */
+.td-check{width:32px;text-align:center;}
+.td-n{font-family:var(--mono);font-size:10px;color:var(--text3);width:24px;}
+.td-task{color:var(--text);font-size:13px;}
+.td-task-inner{display:flex;flex-direction:column;gap:2px;}
+.task-comment{font-size:11px;color:var(--text3);font-style:italic;}
+.td-who{font-family:var(--mono);font-size:11px;color:var(--accent);white-space:nowrap;width:130px;}
+.td-date{font-family:var(--mono);font-size:11px;white-space:nowrap;width:115px;}
+.td-actions{width:74px;white-space:nowrap;}
+.dpill{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;}
+.dpill.ok{background:var(--green-bg);color:var(--green);}
+.dpill.soon{background:var(--orange-bg);color:var(--orange);}
+.dpill.overdue{background:var(--red-bg);color:var(--red);font-weight:600;}
+
+/* POSTPONE COUNTER */
+.postpone-cnt{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:9px;color:var(--orange);background:var(--orange-bg);border:1px solid #fed7aa;padding:1px 5px;border-radius:3px;margin-left:5px;}
+
+/* ROW ACTION BUTTONS */
+.row-actions{display:inline-flex;gap:3px;opacity:0;transition:opacity .12s;}
+tr:hover .row-actions{opacity:1;}
+.done-row .row-actions{opacity:1;}
+.rbtn{background:none;border:1px solid var(--border2);color:var(--text3);cursor:pointer;font-size:11px;padding:2px 6px;border-radius:4px;transition:all .12s;font-family:var(--sans);white-space:nowrap;}
+.rbtn:hover{border-color:var(--border);color:var(--text2);}
+.rbtn.done-btn:hover{border-color:#bbf7d0;color:var(--green);background:var(--green-bg);}
+.rbtn.undone-btn{border-color:#bbf7d0;color:var(--green);background:var(--green-bg);}
+.rbtn.undone-btn:hover{border-color:var(--border2);color:var(--text3);background:transparent;}
+.rbtn.postpone-btn:hover{border-color:#fed7aa;color:var(--orange);background:var(--orange-bg);}
+.rbtn.comment-btn:hover{border-color:var(--accent-light);color:var(--accent);background:var(--accent-bg);}
+.rbtn.del-btn:hover{border-color:#fecaca;color:var(--red);background:var(--red-bg);}
+
+/* DONE CHECKBOX */
+.check-box{width:16px;height:16px;border:1.5px solid var(--border2);border-radius:4px;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .12s;flex-shrink:0;}
+.check-box.checked{background:var(--green);border-color:var(--green);color:#fff;font-size:10px;}
+
+.no-tasks td{padding:12px 10px;color:var(--text3);font-style:italic;font-size:12px;text-align:center;}
+
+/* ADD TASK BTN */
+.btn-add{display:flex;align-items:center;gap:7px;width:calc(100% - 22px);margin:0 11px 11px;padding:6px 13px;background:transparent;border:1.5px dashed var(--border2);color:var(--text3);font-family:var(--sans);font-size:12px;cursor:pointer;border-radius:6px;transition:all .15s;}
+.btn-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-bg);}
+.btn-add.disabled{pointer-events:none;opacity:.35;}
+
+/* SEC DIV */
+.sec-div{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.12em;color:var(--text3);padding:14px 0 7px;display:flex;align-items:center;gap:10px;}
+.sec-div::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* MODALS */
+.overlay{display:none;position:fixed;inset:0;background:rgba(15,20,35,.35);z-index:500;align-items:center;justify-content:center;backdrop-filter:blur(2px);}
+.overlay.open{display:flex;}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:12px;width:500px;max-width:96vw;box-shadow:0 20px 60px rgba(0,0,0,.16);animation:slideIn .18s ease;}
+@keyframes slideIn{from{opacity:0;transform:translateY(-8px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
+.modal.sm{width:400px;}
+.modal.md{width:460px;}
+.modal-hd{display:flex;align-items:flex-start;justify-content:space-between;padding:15px 18px 12px;border-bottom:1px solid var(--border);}
+.modal-hd-title{font-size:14px;font-weight:600;color:var(--text);}
+.modal-hd-sub{font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:3px;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.btn-mclose{background:var(--bg);border:1px solid var(--border);color:var(--text2);font-size:15px;cursor:pointer;width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .12s;flex-shrink:0;}
+.btn-mclose:hover{background:var(--red-bg);border-color:#fecaca;color:var(--red);}
+.modal-bd{padding:15px 18px;display:flex;flex-direction:column;gap:13px;}
+.f-label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--text3);display:block;margin-bottom:5px;}
+.f-input{width:100%;background:var(--bg);border:1px solid var(--border2);color:var(--text);font-family:var(--sans);font-size:13px;padding:7px 11px;border-radius:6px;outline:none;transition:all .15s;}
+.f-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
+.f-input::placeholder{color:var(--text3);}
+.f-input.error{border-color:var(--red);box-shadow:0 0 0 3px #fee2e2;}
+.f-textarea{resize:vertical;min-height:72px;font-family:var(--sans);line-height:1.5;}
+.f-row{display:flex;gap:11px;}
+.f-row>div{flex:1;}
+.f-hint{font-size:11px;color:var(--text3);margin-top:4px;}
+.modal-ft{padding:11px 18px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end;}
+.btn-cancel{background:var(--bg);border:1px solid var(--border2);color:var(--text2);font-family:var(--sans);font-size:13px;padding:6px 16px;cursor:pointer;border-radius:6px;transition:all .12s;}
+.btn-cancel:hover{border-color:var(--text2);color:var(--text);}
+.btn-primary{background:var(--accent);border:1px solid var(--accent);color:#fff;font-family:var(--sans);font-size:13px;font-weight:500;padding:6px 20px;cursor:pointer;border-radius:6px;transition:all .12s;}
+.btn-primary:hover{background:#1d4ed8;}
+.btn-danger{background:var(--red);border:1px solid var(--red);color:#fff;font-family:var(--sans);font-size:13px;font-weight:500;padding:6px 20px;cursor:pointer;border-radius:6px;transition:all .12s;}
+.btn-danger:hover{background:#b91c1c;}
+
+/* POSTPONE MODAL date chips */
+.date-chips{display:flex;gap:7px;flex-wrap:wrap;}
+.date-chip{background:var(--bg);border:1px solid var(--border2);color:var(--text2);font-family:var(--mono);font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;transition:all .12s;}
+.date-chip:hover{border-color:var(--orange);color:var(--orange);background:var(--orange-bg);}
+.date-chip.selected{background:var(--orange);border-color:var(--orange);color:#fff;}
+
+/* NEW PROTO INFO */
+.info-box{background:var(--accent-bg);border:1px solid var(--accent-light);border-radius:6px;padding:9px 13px;font-size:12px;color:var(--text2);line-height:1.6;}
+.info-box strong{color:var(--text);}
+
+/* FOOTER */
+.app-footer{background:var(--surface);border-top:1px solid var(--border);padding:9px 18px;font-family:var(--mono);font-size:10px;color:var(--text3);flex-shrink:0;}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:50px 20px;color:var(--text3);}
+.empty-state .es-icon{font-size:32px;margin-bottom:10px;}
+
+/* PRINT / PDF */
+@media print {
+  .topbar,.sidebar,.history-panel,.filter-bar,.stats-row,.head-actions,.row-actions,.btn-add,.app-footer,
+  .locked-banner,.btn-mclose,.rbtn,.bha,.check-box{display:none!important;}
+  .layout{display:block;}
+  .main-area{padding:0;overflow:visible;}
+  .obj-card{box-shadow:none;border:1px solid #ccc;margin-bottom:6px;break-inside:avoid;}
+  .obj-head{background:#f5f5f5!important;padding:6px 10px;}
+  .tasks-table th{background:#f5f5f5!important;}
+  .done-row{display:none;}
+  body{font-size:11px;}
+  .obj-name{font-size:12px;}
+  @page{margin:15mm;}
+}
+
+::-webkit-scrollbar{width:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+@media(max-width:1000px){.history-panel{display:none;}}
+@media(max-width:700px){.sidebar{display:none;}.topbar-logo{display:none;}.search-wrap input{width:150px;}}
+
+/* HISTORY OVERLAY VIEW */
+.overlay-history-view{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:center;z-index:500;padding:20px;overflow:auto;opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;}
+.overlay-history-view.open{opacity:1;visibility:visible;}
+.history-view-container{background:var(--surface);border-radius:8px;width:100%;max-width:1200px;height:90vh;display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,0.2);}
+.hv-header{padding:16px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.hv-title{font-size:15px;font-weight:600;color:var(--text);}
+.hv-close-btn{background:var(--bg);border:1px solid var(--border);color:var(--text2);font-size:18px;cursor:pointer;width:32px;height:32px;border-radius:6px;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.hv-close-btn:hover{background:var(--red-bg);border-color:#fecaca;color:var(--red);}
+.hv-content{display:flex;flex:1;min-height:0;}
+.hv-sidebar{width:var(--sidebar-w);border-right:1px solid var(--border);overflow-y:auto;}
+.hv-main{flex:1;overflow-y:auto;padding:14px 18px;}
+.hv-item{display:flex;align-items:center;gap:7px;padding:8px 12px;cursor:default;border-left:3px solid transparent;color:var(--text2);font-size:12px;}
+.hv-item.active{background:var(--accent-bg);border-left-color:var(--accent);}
+.hv-item .si-num{font-family:var(--mono);font-size:9px;color:var(--text3);min-width:20px;}
+.hv-item .si-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.hv-read-only{pointer-events:none;opacity:0.9;}
+.hv-obj-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;}
+.hv-obj-head{background:var(--accent-bg);padding:12px 14px;border-bottom:1px solid var(--border);}
+.hv-obj-name{font-size:13px;font-weight:600;color:var(--accent);}
+.hv-obj-meta{font-size:11px;color:var(--text2);margin-top:3px;}
+.hv-tasks-table{width:100%;border-collapse:collapse;}
+.hv-task-row{border-bottom:1px solid var(--border);display:flex;padding:10px 14px;gap:10px;}
+.hv-task-row.done-row{background:var(--done-bg);opacity:0.7;}
+.hv-task-n{font-family:var(--mono);font-size:10px;color:var(--text3);min-width:25px;flex-shrink:0;}
+.hv-task-text{flex:1;color:var(--text);font-size:12px;word-break:break-word;}
+.hv-task-who{font-size:11px;color:var(--text2);min-width:100px;flex-shrink:0;}
+.hv-task-date{font-size:11px;min-width:80px;flex-shrink:0;}
+.hv-empty-msg{padding:20px;color:var(--text3);text-align:center;font-size:12px;}
+
+@media(max-width:1000px){
+  .hv-sidebar{width:200px;}
+  .history-view-container{max-width:95vw;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-logo">ГИП·ФОРМАТ</div>
+  <div class="topbar-proto">
+    <span class="proto-badge" id="protoBadge">Протокол №—</span>
+    <span class="proto-date" id="protoDateLabel"></span>
+  </div>
+  <div class="topbar-right">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="searchInput" placeholder="Поиск...">
+    </div>
+    <button class="tbtn tbtn-pdf" onclick="printPDF()">🖨 PDF</button>
+    <button class="tbtn tbtn-primary" id="btnLock">✓ Закрыть протокол</button>
+    <button class="tbtn tbtn-ghost" id="btnNewProto">+ Новый</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <nav class="sidebar" id="sidebar"></nav>
+
+  <div class="main-area">
+
+    <div id="lockedBanner" style="display:none">
+      <div class="locked-banner">🔒 Протокол закрыт. Для изменений создайте новый.
+        <button onclick="openNewProtoModal()" style="margin-left:auto;background:var(--green);border:none;color:#fff;padding:4px 11px;border-radius:4px;cursor:pointer;font-size:12px;font-family:var(--sans);">Создать новый</button>
+      </div>
+    </div>
+
+    <div class="filter-bar">
+      <span class="filter-label">Фильтр:</span>
+      <div class="filter-chips" id="filterChips"></div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-icon si-blue">📋</div><div><div class="stat-val" id="sActive">—</div><div class="stat-lbl">Активных задач</div></div></div>
+      <div class="stat-card clickable" id="statOverdueCard" onclick="toggleOverdueFilter()">
+        <div class="stat-icon si-red">🔴</div><div><div class="stat-val" id="sOverdue">—</div><div class="stat-lbl">Просрочено</div></div>
+      </div>
+      <div class="stat-card"><div class="stat-icon si-orange">⚠️</div><div><div class="stat-val" id="sSoon">—</div><div class="stat-lbl">До 7 дней</div></div></div>
+      <div class="stat-card"><div class="stat-icon si-green">✅</div><div><div class="stat-val" id="sDone">—</div><div class="stat-lbl">Выполнено</div></div></div>
+      <div class="stat-card"><div class="stat-icon si-gray">⏸</div><div><div class="stat-val" id="sStop">—</div><div class="stat-lbl">На стопе</div></div></div>
+    </div>
+
+    <div id="objectsArea"></div>
+  </div>
+
+  <div class="history-panel">
+    <div class="hp-header">
+      <div class="hp-title">История протоколов</div>
+      <div class="hp-sub" id="historyCount">—</div>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+</div>
+
+<div class="app-footer" id="appFooter"></div>
+
+<!-- MODAL: ADD TASK -->
+<div class="overlay" id="overlayTask">
+  <div class="modal">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">Добавить задачу</div><div class="modal-hd-sub" id="mTaskObjName"></div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayTask')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div><label class="f-label">Задание *</label><input class="f-input" id="mTask" placeholder="Описание задачи..."></div>
+      <div class="f-row">
+        <div><label class="f-label">Исполнитель</label><input class="f-input" id="mWho" list="whoList" placeholder="Фамилия..."><datalist id="whoList"></datalist></div>
+        <div><label class="f-label">Срок исполнения</label><input class="f-input" id="mDate" placeholder="ДД.ММ.ГГ"></div>
+      </div>
+      <div><label class="f-label">Комментарий</label><textarea class="f-input f-textarea" id="mComment" placeholder="Дополнительные заметки..."></textarea></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayTask')">Отмена</button>
+      <button class="btn-primary" onclick="saveTask()">Добавить задачу</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: COMMENT -->
+<div class="overlay" id="overlayComment">
+  <div class="modal md">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">Комментарий к задаче</div><div class="modal-hd-sub" id="mCommentTask"></div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayComment')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div><label class="f-label">Комментарий / заметка</label>
+        <textarea class="f-input f-textarea" id="mCommentText" placeholder="Что происходит с задачей, какие есть препятствия..."></textarea>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayComment')">Отмена</button>
+      <button class="btn-primary" onclick="saveComment()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: POSTPONE -->
+<div class="overlay" id="overlayPostpone">
+  <div class="modal md">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">Перенести срок</div><div class="modal-hd-sub" id="mPostponeTask"></div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayPostpone')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div>
+        <label class="f-label">Быстрый выбор</label>
+        <div class="date-chips" id="postponeChips"></div>
+      </div>
+      <div>
+        <label class="f-label">Или введите дату вручную</label>
+        <input class="f-input" id="mPostponeDate" placeholder="ДД.ММ.ГГ">
+        <div class="f-hint">Текущий срок: <span id="mPostponeCurrent"></span></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayPostpone')">Отмена</button>
+      <button class="btn-primary" onclick="savePostpone()">Перенести</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: EDIT ROLES -->
+<div class="overlay" id="overlayRoles">
+  <div class="modal sm">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">Роли на объекте</div><div class="modal-hd-sub" id="mRolesObjName"></div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayRoles')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div><label class="f-label">ГИП (главный инженер проекта)</label><input class="f-input" id="mGip" list="whoList2" placeholder="Фамилия..."><datalist id="whoList2"></datalist></div>
+      <div><label class="f-label">РП (руководитель проекта)</label><input class="f-input" id="mRp" list="whoList3" placeholder="Фамилия..."><datalist id="whoList3"></datalist></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayRoles')">Отмена</button>
+      <button class="btn-primary" onclick="saveRoles()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: ADD OBJECT -->
+<div class="overlay" id="overlayAddObj">
+  <div class="modal md">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">Добавить объект</div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayAddObj')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div><label class="f-label">Название объекта *</label><input class="f-input" id="mObjName" placeholder="Например: ЖК Звёздный, г. Уфа"></div>
+      <div class="f-row">
+        <div><label class="f-label">ГИП</label><input class="f-input" id="mObjGip" list="whoList4" placeholder="Фамилия..."><datalist id="whoList4"></datalist></div>
+        <div><label class="f-label">РП</label><input class="f-input" id="mObjRp" list="whoList5" placeholder="Фамилия..."><datalist id="whoList5"></datalist></div>
+      </div>
+      <div>
+        <label class="f-label">Тип</label>
+        <select class="f-input" id="mObjType">
+          <option value="">Обычный объект</option>
+          <option value="stop">Объект на СТОПЕ</option>
+          <option value="org">Организационный / Концепция</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayAddObj')">Отмена</button>
+      <button class="btn-primary" onclick="saveNewObject()">Добавить объект</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: NEW PROTOCOL -->
+<div class="overlay" id="overlayNewProto">
+  <div class="modal sm">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">Новый протокол</div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayNewProto')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div class="info-box" id="newProtoInfo"></div>
+      <div class="f-row">
+        <div><label class="f-label">Номер протокола *</label><input class="f-input" id="mProtoNum" placeholder="3"></div>
+        <div><label class="f-label">Дата совещания *</label><input class="f-input" id="mProtoDate" placeholder="ДД.ММ.ГГГГ"></div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayNewProto')">Отмена</button>
+      <button class="btn-primary" onclick="createNewProto()">Создать</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CONFIRM LOCK -->
+<div class="overlay" id="overlayLock">
+  <div class="modal sm">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">Закрыть протокол?</div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayLock')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;">
+        Протокол будет сохранён в историю. Редактирование заблокируется.<br><br>
+        Выполненные задачи не переносятся в следующий протокол.
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayLock')">Отмена</button>
+      <button class="btn-danger" onclick="lockProtocol()">Закрыть и сохранить</button>
+    </div>
+
+<!-- OVERLAY: HISTORY VIEW (read-only archive) -->
+<div class="overlay-history-view" id="overlayHistoryView">
+  <div class="history-view-container">
+    <div class="hv-header">
+      <div class="hv-title" id="hvTitle"></div>
+      <button class="hv-close-btn" onclick="closeHistoryView()">×</button>
+    </div>
+    <div class="hv-content">
+      <div class="hv-sidebar" id="hvSidebar"></div>
+      <div class="hv-main" id="hvMainArea"></div>
+    </div>
+  </div>
+</div>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════
+//  STORAGE
+// ══════════════════════════════════════════════
+const SK = 'gip_state_v6';
+const SK_H = 'gip_history_v6';
+
+const INIT = {
+  protoNum: 3,
+  protoDate: "17.03.26",
+  locked: false,
+  objects: [
+    {
+      id: 1,
+      name: "Автосервис и автомойка Дема",
+      gip: "",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Забрать деньги",
+          who: "Шарафутдинов",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 3
+        }
+      ]
+    },
+    {
+      id: 2,
+      name: "ТЦ Михайловка",
+      gip: "",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Подписать договор",
+          who: "Шарафутдинов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 3,
+      name: "Садик Иглино",
+      gip: "Камбулатов",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Доделать РД (АР)",
+          who: "Камбулатов",
+          date: "01.05.26",
+          done: false,
+          comment: "",
+          postpones: 2
+        },
+        {
+          n: 2,
+          task: "Передать в объеме РД – АР",
+          who: "Анацкая",
+          date: "01.05.26",
+          done: false,
+          comment: "",
+          postpones: 2
+        }
+      ]
+    },
+    {
+      id: 4,
+      name: "Школа Шмидтово",
+      gip: "Камбулатов",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Проверка и согласование сметной документации",
+          who: "Камбулатов",
+          date: "01.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Забрать бабки",
+          who: "Камбулатов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 5,
+      name: "Булгаково. Литер 11",
+      gip: "Станишевская",
+      rp: "",
+      stop: true,
+      tasks: [
+        {
+          n: 1,
+          task: "Подготовка к выдачи документации к стройнадзору",
+          who: "Станишевская",
+          date: "01.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 6,
+      name: "ЖД Рабкоров",
+      gip: "Станишевская",
+      rp: "Ханов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Получить согласование стадии П 2 этапа. (АР для согласования)",
+          who: "Станишевская",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Зайти в экспертизу 2 этап",
+          who: "Станишевская",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 3,
+          task: "Оперативка с заказчиком по планировкам, осметить доп работы",
+          who: "Ханов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 7,
+      name: "ЖК по ул. Суворова",
+      gip: "",
+      rp: "Чанышев",
+      stop: true,
+      tasks: [
+        {
+          n: 1,
+          task: "Заключить доп на рд",
+          who: "Чанышев",
+          date: "17.11.25",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 2,
+          task: "Проверить замечания АГО, отвезти в архитектуру Ждем согласования архитектуры",
+          who: "Чанышев",
+          date: "17.10.25",
+          done: false,
+          comment: "",
+          postpones: 1
+        }
+      ]
+    },
+    {
+      id: 8,
+      name: "ЖД Тольятти",
+      gip: "",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 2,
+          task: "Корректировка РД (ЭМ, СПА,)",
+          who: "Шарафутдинов",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 4
+        },
+        {
+          n: 2,
+          task: "Получить информацию по квартирам и сделать доп соглашение",
+          who: "Шарафутдинов",
+          date: "03.02.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 9,
+      name: "Усадьба Бухартовских",
+      gip: "",
+      rp: "Шарафутдинов",
+      stop: true,
+      tasks: [
+        {
+          n: 1,
+          task: "рд",
+          who: "Шарафутдинов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 10,
+      name: "МКД в с. Ольховое",
+      gip: "Камбулатов",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Получить свои бобулеты",
+          who: "Чанышев",
+          date: "15.04.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        }
+      ]
+    },
+    {
+      id: 11,
+      name: "МКД в г. Благовещенск",
+      gip: "Станишевская",
+      rp: "Чанышев",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Собрать все изменения по исполнительной",
+          who: "Галин",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Получить свои бобулеты",
+          who: "Чанышев",
+          date: "15.04.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 12,
+      name: "МКД по ул. Злобина — ГК САМОЛЁТ",
+      gip: "Курбангалеев",
+      rp: "Ханов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Выдача разделов РД по графику Не выданы кровли,",
+          who: "Курбангалеев",
+          date: "30.04.26",
+          done: false,
+          comment: "",
+          postpones: 2
+        },
+        {
+          n: 2,
+          task: "Отработка замечаний",
+          who: "Курбангалеев",
+          date: "30.03.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 3,
+          task: "Корректировка ПД в соответствии с РД и прохождение экспертизы в полном объеме",
+          who: "Курбангалеев",
+          date: "30.05.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 4,
+          task: "Провести оперативку по устройству генплана",
+          who: "Ханов",
+          date: "28.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 6,
+          task: "Указать комплект с максимальным отставанием (Ришат)",
+          who: "Курбангалеев",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 7,
+          task: "Организовать выдачу АР",
+          who: "Курбангалеев",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 8,
+          task: "План перемычек и отверстий, выдана только 8 секция, Кроме секции 2-5",
+          who: "Курбангалеев",
+          date: "30.03.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 9,
+          task: "Откорректированный ПСО",
+          who: "Курбангалеев",
+          date: "15.04.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 10,
+          task: "Дополнительный архитектор в группу",
+          who: "Ханов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 11,
+          task: "Подписать акты",
+          who: "Ханов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 12,
+          task: "Ускорить работы по выдачи чертежей фундаментов по секции 2-5",
+          who: "Курбангалеев",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 13,
+      name: "МКД в г. Бирск, Нелидова",
+      gip: "Грушин",
+      rp: "Чанышев",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Получить оплату",
+          who: "Шарафутдинов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 3
+        },
+        {
+          n: 2,
+          task: "Отработать отказ от гос экспертизы",
+          who: "Грушин",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 3,
+          task: "Решить вопрос по договору ГАЗ",
+          who: "Шарафутдинов",
+          date: "27.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 4,
+          task: "Найти сметчика на проект",
+          who: "Шарафутдинов",
+          date: "27.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Снять СЗЗ от заказчика",
+          who: "Шарафутдинов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 6,
+          task: "Оплата гос экспертизы от заказчика",
+          who: "Шарафутдинов",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 7,
+          task: "Отработать с замечания по гос экспертизы.",
+          who: "Грушин",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 8,
+          task: "Договора со смежниками по замечаниями",
+          who: "Шарафутдинов",
+          date: "20.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 14,
+      name: "Автосалон на Рубежной",
+      gip: "Галин",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Получить заключение экспертизы по стадии П",
+          who: "Шарафутдинов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Разработать рабочую документацию",
+          who: "Шарафутдинов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 3,
+          task: "Отработать замечания по ПЗУ",
+          who: "Галин",
+          date: "22.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 4,
+          task: "Закрыть первый этап",
+          who: "Шарафутдинов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        }
+      ]
+    },
+    {
+      id: 15,
+      name: "Складской комплекс Уфанет в с. Миловка",
+      gip: "",
+      rp: "",
+      stop: true,
+      tasks: []
+    },
+    {
+      id: 16,
+      name: "ППМ Кремлёвская / Б. Хмельницкого",
+      gip: "",
+      rp: "Чанышев",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Уточнить наличие закрывающих документов",
+          who: "Чанышев",
+          date: "07.01.26",
+          done: false,
+          comment: "",
+          postpones: 3
+        }
+      ]
+    },
+    {
+      id: 17,
+      name: "ЖК на ул. Барамзиной, г. Пермь",
+      gip: "Станишевская",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Получить договор на следующий квартал",
+          who: "Шарафутдинов",
+          date: "01.03.26",
+          done: false,
+          comment: "",
+          postpones: 2
+        },
+        {
+          n: 2,
+          task: "Подписать АКТ и получить оплату за РД",
+          who: "Шарафутдинов",
+          date: "10.02.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 3,
+          task: "Получить задание по лифтам от заказчика",
+          who: "Шарафутдинов",
+          date: "11.11.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 4,
+          task: "Подписать доп соглашение №2",
+          who: "Шарафутдинов",
+          date: "06.02.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 5,
+          task: "Собрать общее совещание с исполнителями",
+          who: "Шарафутдинов",
+          date: "18.03.26",
+          done: false,
+          comment: "",
+          postpones: 2
+        },
+        {
+          n: 6,
+          task: "Данные по точкам подключений от заказчика",
+          who: "Шарафутдинов",
+          date: "15.04.26",
+          done: false,
+          comment: "",
+          postpones: 2
+        },
+        {
+          n: 7,
+          task: "Выдача рабочей документации",
+          who: "Станишевская",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 8,
+          task: "Выдать спецификации по КР",
+          who: "Станишевская",
+          date: "20.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 9,
+          task: "Получить письмо от заказчика по корректировке ПОС",
+          who: "Шарафутдинов",
+          date: "26.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 10,
+          task: "Отправить подписанный график",
+          who: "Шарафутдинов",
+          date: "20.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 18,
+      name: "Литер 2 УСЗ (Дортранстрой)",
+      gip: "",
+      rp: "Ханов",
+      stop: false,
+      tasks: [
+        {
+          n: 2,
+          task: "Встретиться с Динаром для обсуждения ТЗ Подписать ТЗ с Заказчиком",
+          who: "Ханов",
+          date: "28.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 3,
+          task: "Заключить доп соглашение на АГО",
+          who: "Ханов",
+          date: "28.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 4,
+          task: "Согласовать техническое задние",
+          who: "Ханов",
+          date: "28.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Письмо о начале работ",
+          who: "Ханов",
+          date: "15.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 6,
+          task: "Составить график по исполнителям",
+          who: "Ханов",
+          date: "19.03.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 7,
+          task: "Провести общую оперативку с исполнителями",
+          who: "Ханов",
+          date: "19.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 8,
+          task: "Подготовить ПИРЫ по выносам сетей",
+          who: "Грушин",
+          date: "22.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 9,
+          task: "Замечания по АГО",
+          who: "Грушин",
+          date: "19.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 19,
+      name: "Набережные Челны (Титан)",
+      gip: "",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Найти исполнителей по разделам",
+          who: "Шарафутдинов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 2
+        },
+        {
+          n: 2,
+          task: "Получить ИРД от Заказчика",
+          who: "Шарафутдинов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 4
+        },
+        {
+          n: 3,
+          task: "Составить график работ по этапам Согласовать с Руководством",
+          who: "Шарафутдинов",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 3
+        },
+        {
+          n: 4,
+          task: "Запустить работы по 1 этапу",
+          who: "Шарафутдинов",
+          date: "15.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Получить согласование и решение по 1 этапу",
+          who: "Шарафутдинов",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 20,
+      name: "МКД в г. Бирск — Интернациональная, 29/29А",
+      gip: "Шарафутдинов",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Подготовить и Заключить договор",
+          who: "Шарафутдинов",
+          date: "15.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Найти исполнителей и начать работы по всем разделам",
+          who: "Шарафутдинов",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 3,
+          task: "Зайти в госэкспертизу",
+          who: "Шарафутдинов",
+          date: "01.04.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 4,
+          task: "Запустить все работы по проекту",
+          who: "Шарафутдинов",
+          date: "12.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Передать материалы для КР",
+          who: "Галин",
+          date: "26.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 6,
+          task: "Составить график выдачи рабочей документации",
+          who: "Шарафутдинов",
+          date: "21.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 7,
+          task: "Составить график выдачи проектной документации",
+          who: "Шарафутдинов",
+          date: "23.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 8,
+          task: "Разделить договор на 29 и 29 а с заказчиком",
+          who: "Шарафутдинов",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 21,
+      name: "МКД в г. Бирск — Интернациональная, 27",
+      gip: "Шарафутдинов",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Найти исполнителей и начать работы по всем разделам",
+          who: "Шарафутдинов",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Запустить все работы по проекту",
+          who: "Шарафутдинов",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 22,
+      name: "МКД в г. Бирск — ул. Балезина",
+      gip: "Шарафутдинов",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Найти исполнителей и начать работы по всем разделам",
+          who: "Шарафутдинов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Зайти в госэкспертизу",
+          who: "Шарафутдинов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 3,
+          task: "Запустить все работы по проекту",
+          who: "Шарафутдинов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Передать материалы для КР",
+          who: "Грушин",
+          date: "26.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 6,
+          task: "Составить график выдачи рабочей документации",
+          who: "Шарафутдинов",
+          date: "21.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 7,
+          task: "Составить график выдачи проектной документации",
+          who: "Шарафутдинов",
+          date: "23.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 8,
+          task: "Решить вопрос с теплоснабжением",
+          who: "Шарафутдинов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 23,
+      name: "535 квартал",
+      gip: "",
+      rp: "Ханов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Анализ проекта планировка",
+          who: "Анацкая",
+          date: "03.10.25",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Заключить договор Презентация для градсовета",
+          who: "Ханов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 3
+        }
+      ]
+    },
+    {
+      id: 24,
+      name: "Лётчиков ППМ",
+      gip: "",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Ждем согласование от заказчика",
+          who: "",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 25,
+      name: "Булгаково ППМ",
+      gip: "",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Оперативка",
+          who: "Шарафутдинов",
+          date: "13.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 26,
+      name: "Контора Булгаково",
+      gip: "",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Зайти в экспертизу",
+          who: "Шарафутдинов",
+          date: "20.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Получить ИРД",
+          who: "Шарафутдинов",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 3,
+          task: "Получить аванс за работы",
+          who: "Шарафутдинов",
+          date: "28.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 4,
+          task: "Решить что делаем с объектом дальше",
+          who: "Шарафутдинов",
+          date: "22.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 27,
+      name: "Благовещенск ТИТАН",
+      gip: "",
+      rp: "Ханов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Подписать договор поручительства",
+          who: "Ханов",
+          date: "28.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Найти исполнителей на работы",
+          who: "Ханов",
+          date: "28.01.26",
+          done: false,
+          comment: "",
+          postpones: 1
+        },
+        {
+          n: 3,
+          task: "Получить ИРД",
+          who: "Ханов",
+          date: "31.03.26",
+          done: false,
+          comment: "",
+          postpones: 2
+        },
+        {
+          n: 4,
+          task: "Согласовать типовой этаж",
+          who: "Ханов",
+          date: "30.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Найти вк на объект",
+          who: "Ханов",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 28,
+      name: "Авангард",
+      gip: "Камбулатов",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Уточнить по объему обследования и обмер зданий",
+          who: "",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Подписать договор",
+          who: "Чанышев",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 3,
+          task: "Составить список исполнителей, еще РП и ГП",
+          who: "Камбулатов",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 4,
+          task: "Согласовать техническое задание",
+          who: "Камбулатов",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Проверка договора",
+          who: "Камбулатов",
+          date: "21.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 6,
+          task: "Согласование планировок",
+          who: "Грушин",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 7,
+          task: "Получение тех карт",
+          who: "Грушин",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 8,
+          task: "Составить ведомость дем элементов и запустить под",
+          who: "Грушин",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 9,
+          task: "Составляем ПИР по сетям",
+          who: "Грушин",
+          date: "23.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 29,
+      name: "Организационные вопросы",
+      gip: "",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Запустить мегаплан для всех",
+          who: "Федорова / Ханов",
+          date: "13.01.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ],
+      org: true
+    },
+    {
+      id: 30,
+      name: "Концепции",
+      gip: "",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 4,
+          task: "Апартаменты по ул. Авроры - Подготовить посадку и концептуальное предложение - Заключить договор на работы",
+          who: "Ханов",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Уфанет бизнес-центр - размещение на участке - стройгенплан - объем здания в окружении",
+          who: "Чанышев",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 6,
+          task: "Детский сад в с. Иглино - Подготовить посадку и зональную планировку помещений",
+          who: "Чанышев",
+          date: null,
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ],
+      org: true
+    },
+    {
+      id: 31,
+      name: "Унистрой - Уфа КСИО",
+      gip: "",
+      rp: "Шарафутдинов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Заключить договор",
+          who: "Шарафутдинов",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Ознакомиться с территорией",
+          who: "Галин/Шарафутдинов",
+          date: "19.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 3,
+          task: "Ознакомится с примером",
+          who: "Галин/Шарафутдинов",
+          date: "19.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 4,
+          task: "Определить людей кто будет делать",
+          who: "Шарафутдинов",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 5,
+          task: "Собрать укрупнённые нагрузки",
+          who: "Галин",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 32,
+      name: "Кампус",
+      gip: "Камбулатов",
+      rp: "",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Заключить договор и получить аванс",
+          who: "Камбулатов",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Корректировка СС",
+          who: "Камбулатов",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    },
+    {
+      id: 33,
+      name: "Сарва",
+      gip: "",
+      rp: "Ханов",
+      stop: false,
+      tasks: [
+        {
+          n: 1,
+          task: "Дать КП",
+          who: "Ханов",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        },
+        {
+          n: 2,
+          task: "Посмотреть СЗЗ",
+          who: "Ханов",
+          date: "27.03.26",
+          done: false,
+          comment: "",
+          postpones: 0
+        }
+      ]
+    }
+  ]
+};
+
+function loadState(){try{const r=localStorage.getItem(SK);return r?JSON.parse(r):JSON.parse(JSON.stringify(INIT));}catch(e){return JSON.parse(JSON.stringify(INIT));}}
+function saveState(){localStorage.setItem(SK,JSON.stringify(state));}
+function loadHistory(){try{const stored=localStorage.getItem(SK_H);return stored?JSON.parse(stored):[{"protoNum": 2, "protoDate": "20.01.2026", "locked": true, "objects": [{"id": 1, "name": "Автосервис и автомойка Дема", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Забрать деньги", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 2, "name": "ТЦ Михайловка", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Подписать договор", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 3, "name": "Садик Иглино", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Доделать РД (АР)", "who": "Камбулатов", "date": "01.05.26", "done": false, "comment": "", "postpones": 2}, {"n": 2, "task": "Передать в объёме РД — АР", "who": "Анацкая", "date": "01.05.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 4, "name": "Школа Шмидтово", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Проверка и согласование сметной документации", "who": "Камбулатов", "date": "01.03.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 5, "name": "Булгаково. Литер 11", "gip": "Станишевская", "rp": "", "stop": true, "tasks": [{"n": 1, "task": "Подготовка к выдаче документации в стройнадзор", "who": "Станишевская", "date": "01.03.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 6, "name": "ЖД Рабкоров", "gip": "Станишевская", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Получить согласование стадии П, 2 этапа", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Зайти в экспертизу, 2 этап", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Оперативка с заказчиком по планировкам, осметить доп. работы", "who": "Ханов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 7, "name": "ЖК по ул. Суворова", "gip": "", "rp": "Чанышев", "stop": true, "tasks": [{"n": 1, "task": "Заключить доп. соглашение на РД", "who": "Чанышев", "date": "17.11.25", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Ждём согласования архитектуры", "who": "Чанышев", "date": "17.10.25", "done": false, "comment": "", "postpones": 1}]}, {"id": 8, "name": "ЖД Тольятти", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Корректировка РД (ЭМ, СПА)", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 4}, {"n": 2, "task": "Получить информацию по квартирам и сделать доп. соглашение", "who": "Шарафутдинов", "date": "03.02.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 9, "name": "Усадьба Бухартовских", "gip": "", "rp": "Шарафутдинов", "stop": true, "tasks": [{"n": 1, "task": "РД", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 10, "name": "МКД в с. Ольховое", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Получить оплату", "who": "Камбулатов", "date": "25.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 11, "name": "МКД в г. Благовещенск", "gip": "Станишевская", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Собрать все изменения по исполнительной", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Получить оплату", "who": "Чанышев", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 12, "name": "МКД по ул. Злобина — ГК САМОЛЁТ", "gip": "Курбангалеев", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Выдача разделов РД по графику (не выданы кровли)", "who": "Курбангалеев", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Отработка замечаний", "who": "Курбангалеев", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Корректировка ПД и прохождение экспертизы (отставание ~1 мес.)", "who": "Курбангалеев", "date": "30.05.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Провести оперативку по устройству генплана", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Указать комплект с максимальным отставанием", "who": "Курбангалеев", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Организовать выдачу АР, разбить сроки и задачи", "who": "Курбангалеев", "date": "31.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 7, "task": "План перемычек и отверстий (выдана только 8 секция)", "who": "Курбангалеев", "date": "27.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 8, "task": "Откорректированный ПСО", "who": "Курбангалеев", "date": "15.04.26", "done": false, "comment": "", "postpones": 0}, {"n": 9, "task": "Дополнительный архитектор в группу", "who": "Ханов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 13, "name": "МКД в г. Бирск, Нелидова", "gip": "Грушин", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Получить оплату", "who": "Чанышев", "date": "31.11.25", "done": false, "comment": "", "postpones": 3}, {"n": 2, "task": "Отработать отказ от госэкспертизы", "who": "Грушин", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Решить вопрос по договору ГАЗ", "who": "Шарафутдинов", "date": "27.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 14, "name": "Автосалон на Рубежной", "gip": "Галин", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить заключение экспертизы по стадии П", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Разработать рабочую документацию", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Закрыть первый этап", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 15, "name": "Складской комплекс Уфанет в с. Миловка", "gip": "", "rp": "", "stop": true, "tasks": []}, {"id": 16, "name": "ППМ Кремлёвская / Б. Хмельницкого", "gip": "", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Уточнить наличие закрывающих документов", "who": "Чанышев", "date": "07.01.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 17, "name": "ЖК на ул. Барамзиной, г. Пермь", "gip": "Станишевская", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить договор на следующий квартал", "who": "Шарафутдинов", "date": "01.03.26", "done": false, "comment": "", "postpones": 2}, {"n": 2, "task": "Подписать АКТ и получить оплату за РД", "who": "Шарафутдинов", "date": "10.02.26", "done": false, "comment": "", "postpones": 1}, {"n": 3, "task": "Подписать доп. соглашение №2", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 1}, {"n": 4, "task": "Собрать совещание с исполнителями", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 5, "task": "Данные по точкам подключений от заказчика", "who": "Шарафутдинов", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 6, "task": "Выдача рабочей документации", "who": "Станишевская", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 7, "task": "Выдать спецификации по КР", "who": "Станишевская", "date": "20.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 8, "task": "Получить письмо по корректировке ПОС", "who": "Шарафутдинов", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 9, "task": "Отправить подписанный график", "who": "Шарафутдинов", "date": "20.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 18, "name": "Литер 2 УСЗ (Дортранстрой)", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Встретиться с Динаром для обсуждения ТЗ. Подписать ТЗ", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Заключить доп. соглашение на АГО", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Согласовать техническое задание", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график по исполнителям", "who": "Ханов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Провести общую оперативку с исполнителями", "who": "Ханов", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Подготовить ПИРЫ по выносам сетей", "who": "Станишевская", "date": "22.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 19, "name": "Набережные Челны (Титан)", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей по разделам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Получить ИРД от заказчика", "who": "Шарафутдинов", "date": "02.01.26", "done": false, "comment": "", "postpones": 3}, {"n": 3, "task": "Составить график работ по этапам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 3}, {"n": 4, "task": "Получить согласование и решение по 1 этапу", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 20, "name": "МКД в г. Бирск — Интернациональная, 29/29А", "gip": "Шарафутдинов", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы по всем разделам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Зайти в госэкспертизу", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Передать материалы для КР", "who": "Галин", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график выдачи РД", "who": "Шарафутдинов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Составить график выдачи ПД", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 21, "name": "МКД в г. Бирск — Интернациональная, 27", "gip": "Шарафутдинов", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Запустить все работы по проекту", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 22, "name": "МКД в г. Бирск — ул. Балезина", "gip": "Шарафутдинов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Зайти в госэкспертизу", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Передать материалы для КР", "who": "Грушин", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график выдачи РД", "who": "Шарафутдинов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Составить график выдачи ПД", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 23, "name": "535 квартал", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Заключить договор. Презентация для градсовета", "who": "Ханов", "date": "30.01.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 24, "name": "Лётчиков ППМ", "gip": "", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Ждём согласования от заказчика", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 25, "name": "Булгаково ППМ", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Провести оперативку", "who": "Шарафутдинов", "date": "13.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 26, "name": "Контора Булгаково", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить ИРД", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Получить аванс за работы", "who": "Шарафутдинов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Решить что делаем с объектом дальше", "who": "Шарафутдинов", "date": "22.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 27, "name": "Благовещенск ТИТАН", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Подписать договор поручительства", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Найти исполнителей на работы", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 3, "task": "Получить ИРД", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 4, "task": "Согласовать типовой этаж", "who": "Ханов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 28, "name": "Авангард", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Уточнить объём обследования и обмер зданий", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Подписать договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Составить список исполнителей, РП и ГП", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Согласовать техническое задание", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Проверка договора", "who": "Камбулатов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 29, "name": "Организационные вопросы", "gip": "", "rp": "", "org": true, "stop": false, "tasks": []}, {"id": 30, "name": "Концепции", "gip": "", "rp": "", "org": true, "stop": false, "tasks": [{"n": 1, "task": "ЖК Сириус — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Инвестчас в г. Нижнекамск — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "КРТ на Затонском кольце — посадка, концепция", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Апартаменты по ул. Авроры — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Уфанет бизнес-центр: размещение, стройгенплан, объём", "who": "", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Детский сад в с. Иглино — посадка и зональная планировка", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}]}], "savedAt": "2026-03-19T08:30:35.702937"}]}catch(e){return [{"protoNum": 2, "protoDate": "20.01.2026", "locked": true, "objects": [{"id": 1, "name": "Автосервис и автомойка Дема", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Забрать деньги", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 2, "name": "ТЦ Михайловка", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Подписать договор", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 3, "name": "Садик Иглино", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Доделать РД (АР)", "who": "Камбулатов", "date": "01.05.26", "done": false, "comment": "", "postpones": 2}, {"n": 2, "task": "Передать в объёме РД — АР", "who": "Анацкая", "date": "01.05.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 4, "name": "Школа Шмидтово", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Проверка и согласование сметной документации", "who": "Камбулатов", "date": "01.03.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 5, "name": "Булгаково. Литер 11", "gip": "Станишевская", "rp": "", "stop": true, "tasks": [{"n": 1, "task": "Подготовка к выдаче документации в стройнадзор", "who": "Станишевская", "date": "01.03.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 6, "name": "ЖД Рабкоров", "gip": "Станишевская", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Получить согласование стадии П, 2 этапа", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Зайти в экспертизу, 2 этап", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Оперативка с заказчиком по планировкам, осметить доп. работы", "who": "Ханов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 7, "name": "ЖК по ул. Суворова", "gip": "", "rp": "Чанышев", "stop": true, "tasks": [{"n": 1, "task": "Заключить доп. соглашение на РД", "who": "Чанышев", "date": "17.11.25", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Ждём согласования архитектуры", "who": "Чанышев", "date": "17.10.25", "done": false, "comment": "", "postpones": 1}]}, {"id": 8, "name": "ЖД Тольятти", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Корректировка РД (ЭМ, СПА)", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 4}, {"n": 2, "task": "Получить информацию по квартирам и сделать доп. соглашение", "who": "Шарафутдинов", "date": "03.02.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 9, "name": "Усадьба Бухартовских", "gip": "", "rp": "Шарафутдинов", "stop": true, "tasks": [{"n": 1, "task": "РД", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 10, "name": "МКД в с. Ольховое", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Получить оплату", "who": "Камбулатов", "date": "25.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 11, "name": "МКД в г. Благовещенск", "gip": "Станишевская", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Собрать все изменения по исполнительной", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Получить оплату", "who": "Чанышев", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 12, "name": "МКД по ул. Злобина — ГК САМОЛЁТ", "gip": "Курбангалеев", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Выдача разделов РД по графику (не выданы кровли)", "who": "Курбангалеев", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Отработка замечаний", "who": "Курбангалеев", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Корректировка ПД и прохождение экспертизы (отставание ~1 мес.)", "who": "Курбангалеев", "date": "30.05.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Провести оперативку по устройству генплана", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Указать комплект с максимальным отставанием", "who": "Курбангалеев", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Организовать выдачу АР, разбить сроки и задачи", "who": "Курбангалеев", "date": "31.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 7, "task": "План перемычек и отверстий (выдана только 8 секция)", "who": "Курбангалеев", "date": "27.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 8, "task": "Откорректированный ПСО", "who": "Курбангалеев", "date": "15.04.26", "done": false, "comment": "", "postpones": 0}, {"n": 9, "task": "Дополнительный архитектор в группу", "who": "Ханов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 13, "name": "МКД в г. Бирск, Нелидова", "gip": "Грушин", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Получить оплату", "who": "Чанышев", "date": "31.11.25", "done": false, "comment": "", "postpones": 3}, {"n": 2, "task": "Отработать отказ от госэкспертизы", "who": "Грушин", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Решить вопрос по договору ГАЗ", "who": "Шарафутдинов", "date": "27.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 14, "name": "Автосалон на Рубежной", "gip": "Галин", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить заключение экспертизы по стадии П", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Разработать рабочую документацию", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Закрыть первый этап", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 15, "name": "Складской комплекс Уфанет в с. Миловка", "gip": "", "rp": "", "stop": true, "tasks": []}, {"id": 16, "name": "ППМ Кремлёвская / Б. Хмельницкого", "gip": "", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Уточнить наличие закрывающих документов", "who": "Чанышев", "date": "07.01.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 17, "name": "ЖК на ул. Барамзиной, г. Пермь", "gip": "Станишевская", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить договор на следующий квартал", "who": "Шарафутдинов", "date": "01.03.26", "done": false, "comment": "", "postpones": 2}, {"n": 2, "task": "Подписать АКТ и получить оплату за РД", "who": "Шарафутдинов", "date": "10.02.26", "done": false, "comment": "", "postpones": 1}, {"n": 3, "task": "Подписать доп. соглашение №2", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 1}, {"n": 4, "task": "Собрать совещание с исполнителями", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 5, "task": "Данные по точкам подключений от заказчика", "who": "Шарафутдинов", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 6, "task": "Выдача рабочей документации", "who": "Станишевская", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 7, "task": "Выдать спецификации по КР", "who": "Станишевская", "date": "20.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 8, "task": "Получить письмо по корректировке ПОС", "who": "Шарафутдинов", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 9, "task": "Отправить подписанный график", "who": "Шарафутдинов", "date": "20.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 18, "name": "Литер 2 УСЗ (Дортранстрой)", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Встретиться с Динаром для обсуждения ТЗ. Подписать ТЗ", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Заключить доп. соглашение на АГО", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Согласовать техническое задание", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график по исполнителям", "who": "Ханов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Провести общую оперативку с исполнителями", "who": "Ханов", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Подготовить ПИРЫ по выносам сетей", "who": "Станишевская", "date": "22.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 19, "name": "Набережные Челны (Титан)", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей по разделам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Получить ИРД от заказчика", "who": "Шарафутдинов", "date": "02.01.26", "done": false, "comment": "", "postpones": 3}, {"n": 3, "task": "Составить график работ по этапам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 3}, {"n": 4, "task": "Получить согласование и решение по 1 этапу", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 20, "name": "МКД в г. Бирск — Интернациональная, 29/29А", "gip": "Шарафутдинов", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы по всем разделам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Зайти в госэкспертизу", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Передать материалы для КР", "who": "Галин", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график выдачи РД", "who": "Шарафутдинов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Составить график выдачи ПД", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 21, "name": "МКД в г. Бирск — Интернациональная, 27", "gip": "Шарафутдинов", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Запустить все работы по проекту", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 22, "name": "МКД в г. Бирск — ул. Балезина", "gip": "Шарафутдинов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Зайти в госэкспертизу", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Передать материалы для КР", "who": "Грушин", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график выдачи РД", "who": "Шарафутдинов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Составить график выдачи ПД", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 23, "name": "535 квартал", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Заключить договор. Презентация для градсовета", "who": "Ханов", "date": "30.01.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 24, "name": "Лётчиков ППМ", "gip": "", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Ждём согласования от заказчика", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 25, "name": "Булгаково ППМ", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Провести оперативку", "who": "Шарафутдинов", "date": "13.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 26, "name": "Контора Булгаково", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить ИРД", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Получить аванс за работы", "who": "Шарафутдинов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Решить что делаем с объектом дальше", "who": "Шарафутдинов", "date": "22.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 27, "name": "Благовещенск ТИТАН", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Подписать договор поручительства", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Найти исполнителей на работы", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 3, "task": "Получить ИРД", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 4, "task": "Согласовать типовой этаж", "who": "Ханов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 28, "name": "Авангард", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Уточнить объём обследования и обмер зданий", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Подписать договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Составить список исполнителей, РП и ГП", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Согласовать техническое задание", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Проверка договора", "who": "Камбулатов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 29, "name": "Организационные вопросы", "gip": "", "rp": "", "org": true, "stop": false, "tasks": []}, {"id": 30, "name": "Концепции", "gip": "", "rp": "", "org": true, "stop": false, "tasks": [{"n": 1, "task": "ЖК Сириус — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Инвестчас в г. Нижнекамск — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "КРТ на Затонском кольце — посадка, концепция", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Апартаменты по ул. Авроры — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Уфанет бизнес-центр: размещение, стройгенплан, объём", "who": "", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Детский сад в с. Иглино — посадка и зональная планировка", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}]}], "savedAt": "2026-03-19T08:30:35.702937"}]}}
+function saveHistory(){localStorage.setItem(SK_H,JSON.stringify(history));}
+
+let state   = loadState();
+let history = loadHistory();
+
+// UI state
+let filterWho = 'all';
+let filterObj = 'all';
+let filterOverdue = false;
+let searchQ = '';
+let _taskObjId=null, _commentKey=null, _postponeKey=null, _rolesObjId=null;
+let _postponeSelectedDate=null;
+
+// ══════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════
+function pd(s){
+  if(!s) return null;
+  const p=s.split('.');
+  if(p.length!==3) return null;
+  const yr=p[2].length===2?'20'+p[2]:p[2];
+  return new Date(`${yr}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`);
+}
+function ds(s){
+  const dt=pd(s);
+  if(!dt) return 'none';
+  const today=new Date(); today.setHours(0,0,0,0);
+  const diff=(dt-today)/86400000;
+  if(diff<0) return 'overdue';
+  if(diff<=7) return 'soon';
+  return 'ok';
+}
+function fmtDate(dt){
+  const d=String(dt.getDate()).padStart(2,'0');
+  const m=String(dt.getMonth()+1).padStart(2,'0');
+  const y=String(dt.getFullYear()).slice(2);
+  return `${d}.${m}.${y}`;
+}
+function addDays(n){const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+n); return fmtDate(d);}
+function getAllAssignees(){
+  const s=new Set();
+  state.objects.forEach(o=>o.tasks.forEach(t=>{if(t.who)s.add(t.who);}));
+  return Array.from(s).sort();
+}
+function getObj(id){return state.objects.find(o=>o.id===id);}
+
+// ══════════════════════════════════════════════
+//  TOPBAR
+// ══════════════════════════════════════════════
+function updateTopbar(){
+  document.getElementById('protoBadge').textContent=`Протокол №${state.protoNum}`;
+  document.getElementById('protoBadge').className='proto-badge'+(state.locked?' locked':'');
+  document.getElementById('protoDateLabel').textContent=`от ${state.protoDate}`;
+  const btn=document.getElementById('btnLock');
+  if(state.locked){btn.textContent='🔒 Закрыт';btn.className='tbtn tbtn-locked';btn.onclick=null;}
+  else{btn.textContent='✓ Закрыть протокол';btn.className='tbtn tbtn-primary';btn.onclick=()=>document.getElementById('overlayLock').classList.add('open');}
+  document.getElementById('lockedBanner').style.display=state.locked?'block':'none';
+  document.getElementById('appFooter').textContent=`Протокол №${state.protoNum} от ${state.protoDate} · Присутствовали: Камбулатов, Анацкая, Чанышев, Шарафутдинов, Ханов, Курбангалиев, Галин, Станишевская, Грушин, Федорова, Седунов, Галиев`;
+}
+
+// ══════════════════════════════════════════════
+//  SIDEBAR
+// ══════════════════════════════════════════════
+function buildSidebar(){
+  const sb=document.getElementById('sidebar');
+  sb.innerHTML='';
+  function grp(label,list){
+    if(!list.length) return;
+    const sec=document.createElement('div'); sec.className='sb-section';
+    sec.innerHTML=`<span class="sb-label">${label}</span>`;
+    if(label==='Объекты'){
+      const a=document.createElement('div');
+      a.className='sb-item'+(filterObj==='all'?' active':'');
+      a.innerHTML=`<span class="si-num">—</span><span class="si-name">Все объекты</span>`;
+      a.onclick=()=>setObjFilter('all');
+      sec.appendChild(a);
+    }
+    list.forEach(obj=>{
+      const od=obj.tasks.filter(t=>!t.done&&ds(t.date)==='overdue').length;
+      const it=document.createElement('div');
+      it.className='sb-item'+(filterObj===obj.id?' active':'');
+      it.innerHTML=`<span class="si-num">${String(obj.id).padStart(2,'0')}</span><span class="si-name">${obj.name}</span>${obj.stop?'<span class="si-stop">СТОП</span>':''}<span class="si-cnt ${od>0?'red':''}">${obj.tasks.length}</span>`;
+      it.onclick=()=>setObjFilter(obj.id);
+      sec.appendChild(it);
+    });
+    sb.appendChild(sec);
+    const d=document.createElement('div'); d.className='sb-div'; sb.appendChild(d);
+  }
+  grp('Объекты',state.objects.filter(o=>!o.stop&&!o.org));
+  grp('На стопе',state.objects.filter(o=>o.stop));
+  grp('Прочее',state.objects.filter(o=>o.org));
+
+  // Add object button
+  if(!state.locked){
+    const addBtn=document.createElement('div');
+    addBtn.className='sb-add';
+    addBtn.innerHTML='<span style="font-size:15px">+</span> Добавить объект';
+    addBtn.onclick=openAddObjModal;
+    sb.appendChild(addBtn);
+  }
+}
+function setObjFilter(id){
+  filterObj=id; buildSidebar(); renderObjects();
+  if(id!=='all') setTimeout(()=>{const c=document.querySelector(`.obj-card[data-id="${id}"]`);if(c)c.scrollIntoView({behavior:'smooth',block:'start'});},60);
+}
+
+// ══════════════════════════════════════════════
+//  FILTER CHIPS
+// ══════════════════════════════════════════════
+function buildFilters(){
+  const wrap=document.getElementById('filterChips');
+  wrap.innerHTML='';
+  // Assignee: All
+  const all=document.createElement('button');
+  all.className='chip'+(filterWho==='all'?' active':'');
+  all.textContent='Все';
+  all.onclick=()=>{filterWho='all';buildFilters();renderObjects();};
+  wrap.appendChild(all);
+  // Assignees
+  getAllAssignees().forEach(name=>{
+    const b=document.createElement('button');
+    b.className='chip'+(filterWho===name?' active':'');
+    b.textContent=name.split(' ')[0];
+    b.onclick=()=>{filterWho=name;buildFilters();renderObjects();};
+    wrap.appendChild(b);
+  });
+  // Overdue filter chip
+  const oc=document.createElement('button');
+  oc.className='chip overdue-chip'+(filterOverdue?' active':'');
+  oc.textContent='🔴 Только просроченные';
+  oc.onclick=()=>toggleOverdueFilter();
+  wrap.appendChild(oc);
+}
+
+function toggleOverdueFilter(){
+  filterOverdue=!filterOverdue;
+  buildFilters();
+  document.getElementById('statOverdueCard').classList.toggle('filter-active',filterOverdue);
+  renderObjects();
+}
+
+// ══════════════════════════════════════════════
+//  RENDER
+// ══════════════════════════════════════════════
+function renderObjects(){
+  const area=document.getElementById('objectsArea');
+  area.innerHTML='';
+  let tA=0,tO=0,tS=0,tD=0,tSt=0;
+
+  function renderGroup(list,divLabel){
+    let any=false;
+    const frag=document.createDocumentFragment();
+    if(divLabel){const d=document.createElement('div');d.className='sec-div';d.textContent=divLabel;frag.appendChild(d);}
+
+    list.forEach(obj=>{
+      if(filterObj!=='all'&&filterObj!==obj.id) return;
+
+      let tasks=obj.tasks.filter(t=>{
+        const mW=filterWho==='all'||t.who===filterWho;
+        const mQ=!searchQ||obj.name.toLowerCase().includes(searchQ)||t.task.toLowerCase().includes(searchQ)||(t.who||'').toLowerCase().includes(searchQ);
+        const mO=!filterOverdue||(ds(t.date)==='overdue'&&!t.done);
+        return mW&&mQ&&mO;
+      });
+      if(tasks.length===0&&!(filterWho==='all'&&!searchQ&&!filterOverdue)) return;
+      any=true;
+
+      tasks.forEach(t=>{
+        if(!t.done){
+          if(!obj.stop) tA++;
+          const s=ds(t.date);
+          if(s==='overdue') tO++;
+          if(s==='soon') tS++;
+        } else tD++;
+      });
+      if(obj.stop) tSt++;
+
+      const od=tasks.filter(t=>!t.done&&ds(t.date)==='overdue').length;
+      const activeCnt=tasks.filter(t=>!t.done).length;
+
+      const card=document.createElement('div');
+      card.className='obj-card'+(obj.stop?' stop-mode':'');
+      card.dataset.id=obj.id;
+
+      const rowsHTML=tasks.length>0
+        ? tasks.map(t=>{
+            const st=ds(t.date);
+            const dp=t.date
+              ? `<span class="dpill ${t.done?'':st}">${st==='overdue'&&!t.done?'⚠ ':''}${t.date}</span>`
+              : `<span style="color:var(--text3)">—</span>`;
+            const pCnt=t.postpones>0?`<span class="postpone-cnt">↷${t.postpones}</span>`:'';
+            const commentHTML=t.comment?`<div class="task-comment">💬 ${t.comment}</div>`:'';
+            const rowCls=t.done?'done-row':'';
+            const checkCls=t.done?'check-box checked':'check-box';
+            const checkIcon=t.done?'✓':'';
+            const actBtns=!state.locked?`
+              <span class="row-actions">
+                ${t.done
+                  ? `<button class="rbtn undone-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="undone">↩ Вернуть</button>`
+                  : `<button class="rbtn done-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="done">✓ Готово</button>
+                     <button class="rbtn postpone-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="postpone">↷ Перенести</button>
+                     <button class="rbtn comment-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="comment">💬</button>`
+                }
+                <button class="rbtn del-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="del">×</button>
+              </span>`:'';
+            return `<tr class="${rowCls}">
+              <td class="td-check"><span class="${checkCls}" data-obj="${obj.id}" data-n="${t.n}" data-action="${t.done?'undone':'done'}">${checkIcon}</span></td>
+              <td class="td-n">${t.n}</td>
+              <td class="td-task"><div class="td-task-inner"><span>${t.task}</span>${commentHTML}</div></td>
+              <td class="td-who">${t.who||'<span style="color:var(--text3)">—</span>'}</td>
+              <td class="td-date">${dp}${pCnt}</td>
+              <td class="td-actions">${actBtns}</td>
+            </tr>`;
+          }).join('')
+        : `<tr class="no-tasks"><td colspan="6">Нет активных задач</td></tr>`;
+
+      const roleHTML=[
+        obj.gip?`<span class="role-badge role-gip">ГИП: ${obj.gip}</span>`:'',
+        obj.rp ?`<span class="role-badge role-rp">РП: ${obj.rp}</span>`:'',
+      ].join('');
+
+      const addBtnCls='btn-add'+(state.locked?' disabled':'');
+
+      card.innerHTML=`
+        <div class="obj-head">
+          <span class="obj-num">${String(obj.id).padStart(2,'0')}</span>
+          <span class="obj-name">${obj.name}</span>
+          ${roleHTML}
+          ${obj.stop?'<span class="stop-badge">СТОП</span>':''}
+          ${od>0?`<span class="overdue-badge">⚠ ${od} просрочено</span>`:''}
+          <span class="cnt-badge">${activeCnt} задач</span>
+          <div class="head-actions" onclick="event.stopPropagation()">
+            ${!state.locked?`
+              <button class="bha roles-btn" data-obj="${obj.id}">👤 Роли</button>
+              <button class="bha ${obj.stop?'stop-off':'stop-on'}" data-stop="${obj.id}">${obj.stop?'▶ Снять стоп':'⏸ На стоп'}</button>
+            `:''}
+          </div>
+          <span class="chevron">▾</span>
+        </div>
+        <div class="tasks-body">
+          <table class="tasks-table">
+            <thead><tr>
+              <th style="width:32px"></th>
+              <th style="width:24px">№</th>
+              <th>Задание</th>
+              <th style="width:130px">Исполнитель</th>
+              <th style="width:115px">Срок</th>
+              <th style="width:74px"></th>
+            </tr></thead>
+            <tbody>${rowsHTML}</tbody>
+          </table>
+          <button class="${addBtnCls}" data-obj="${obj.id}"><span style="font-size:15px;line-height:1">+</span> Добавить задачу</button>
+        </div>
+      `;
+
+      card.querySelector('.obj-head').addEventListener('click',()=>card.classList.toggle('collapsed'));
+
+      // Head buttons
+      const stopBtn=card.querySelector('[data-stop]');
+      if(stopBtn) stopBtn.addEventListener('click',e=>{e.stopPropagation();const o=getObj(parseInt(stopBtn.dataset.stop));o.stop=!o.stop;saveState();buildSidebar();renderObjects();});
+      const rolesBtn=card.querySelector('.roles-btn');
+      if(rolesBtn) rolesBtn.addEventListener('click',e=>{e.stopPropagation();openRolesModal(obj.id);});
+
+      // Add task
+      const addBtn=card.querySelector('.btn-add');
+      if(!state.locked) addBtn.addEventListener('click',e=>{e.stopPropagation();openTaskModal(obj.id);});
+
+      // Row actions (delegate)
+      card.addEventListener('click',e=>{
+        const el=e.target.closest('[data-action]');
+        if(!el) return;
+        e.stopPropagation();
+        const oId=parseInt(el.dataset.obj);
+        const n=parseInt(el.dataset.n);
+        const action=el.dataset.action;
+        const o=getObj(oId);
+        const t=o.tasks.find(x=>x.n===n);
+        if(!t) return;
+        if(action==='done'){t.done=true;saveState();buildSidebar();renderObjects();}
+        else if(action==='undone'){t.done=false;saveState();buildSidebar();renderObjects();}
+        else if(action==='postpone') openPostponeModal(oId,n);
+        else if(action==='comment') openCommentModal(oId,n);
+        else if(action==='del'){if(confirm('Удалить задачу?')){o.tasks=o.tasks.filter(x=>x.n!==n);o.tasks.forEach((x,i)=>x.n=i+1);saveState();buildFilters();buildSidebar();renderObjects();}}
+      });
+
+      frag.appendChild(card);
+    });
+
+    if(any) area.appendChild(frag);
+    return any;
+  }
+
+  renderGroup(state.objects.filter(o=>!o.stop&&!o.org),null);
+  renderGroup(state.objects.filter(o=>o.stop),'Объекты на стопе');
+  renderGroup(state.objects.filter(o=>o.org),'Прочее');
+
+  if(!area.children.length)
+    area.innerHTML='<div class="empty-state"><div class="es-icon">🔍</div>Ничего не найдено</div>';
+
+  document.getElementById('sActive').textContent=tA;
+  document.getElementById('sOverdue').textContent=tO;
+  document.getElementById('sSoon').textContent=tS;
+  document.getElementById('sDone').textContent=tD;
+  document.getElementById('sStop').textContent=tSt;
+}
+
+// ══════════════════════════════════════════════
+//  HISTORY
+// ══════════════════════════════════════════════
+function renderHistory(){
+  const list=document.getElementById('historyList');
+  const cnt=document.getElementById('historyCount');
+  list.innerHTML='';
+  if(!history.length){cnt.textContent='Нет закрытых протоколов';list.innerHTML='<div class="hp-empty">История пуста.<br>После закрытия протокол<br>сохранится здесь.</div>';return;}
+  cnt.textContent=`${history.length} в архиве`;
+  [...history].reverse().forEach(h=>{
+    const total=h.objects.reduce((s,o)=>s+o.tasks.length,0);
+    const done=h.objects.reduce((s,o)=>s+o.tasks.filter(t=>t.done).length,0);
+    const it=document.createElement('div');
+    it.className='hp-item';
+    it.innerHTML=`<div class="hp-num">Протокол №${h.protoNum}</div><div class="hp-date">от ${h.protoDate}</div><div class="hp-meta">${total} задач · ${done} выполнено · ${h.objects.filter(o=>o.stop).length} на стопе</div>`;
+    it.onclick=()=>openHistoryView(h);
+    list.appendChild(it);
+  });
+}
+
+// ══════════════════════════════════════════════
+//  MODALS
+// ══════════════════════════════════════════════
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// Task
+function openTaskModal(objId){
+  if(state.locked) return;
+  _taskObjId=objId;
+  const obj=getObj(objId);
+  document.getElementById('mTaskObjName').textContent=obj.name;
+  ['mTask','mWho','mDate','mComment'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mTask').classList.remove('error');
+  document.getElementById('whoList').innerHTML=getAllAssignees().map(a=>`<option value="${a}">`).join('');
+  document.getElementById('overlayTask').classList.add('open');
+  setTimeout(()=>document.getElementById('mTask').focus(),60);
+}
+function saveTask(){
+  const txt=document.getElementById('mTask').value.trim();
+  if(!txt){document.getElementById('mTask').classList.add('error');document.getElementById('mTask').focus();setTimeout(()=>document.getElementById('mTask').classList.remove('error'),1800);return;}
+  const who=document.getElementById('mWho').value.trim();
+  const date=document.getElementById('mDate').value.trim()||null;
+  const comment=document.getElementById('mComment').value.trim();
+  const obj=getObj(_taskObjId);
+  const maxN=obj.tasks.length?Math.max(...obj.tasks.map(t=>t.n)):0;
+  obj.tasks.push({n:maxN+1,task:txt,who,date,done:false,comment,postpones:0});
+  saveState();closeModal('overlayTask');buildFilters();buildSidebar();renderObjects();
+}
+
+// Comment
+function openCommentModal(objId,n){
+  _commentKey={objId,n};
+  const t=getObj(objId).tasks.find(x=>x.n===n);
+  document.getElementById('mCommentTask').textContent=t.task;
+  document.getElementById('mCommentText').value=t.comment||'';
+  document.getElementById('overlayComment').classList.add('open');
+  setTimeout(()=>document.getElementById('mCommentText').focus(),60);
+}
+function saveComment(){
+  const{objId,n}=_commentKey;
+  const t=getObj(objId).tasks.find(x=>x.n===n);
+  t.comment=document.getElementById('mCommentText').value.trim();
+  saveState();closeModal('overlayComment');renderObjects();
+}
+
+// Postpone
+function openPostponeModal(objId,n){
+  _postponeKey={objId,n};
+  _postponeSelectedDate=null;
+  const t=getObj(objId).tasks.find(x=>x.n===n);
+  document.getElementById('mPostponeTask').textContent=t.task;
+  document.getElementById('mPostponeCurrent').textContent=t.date||'не задан';
+  document.getElementById('mPostponeDate').value='';
+
+  const chips=document.getElementById('postponeChips');
+  chips.innerHTML='';
+  const opts=[{label:'+1 неделя',days:7},{label:'+2 недели',days:14},{label:'+1 месяц',days:30},{label:'+2 месяца',days:60}];
+  opts.forEach(o=>{
+    const c=document.createElement('div'); c.className='date-chip'; c.textContent=`${o.label} (${addDays(o.days)})`;
+    c.onclick=()=>{
+      _postponeSelectedDate=addDays(o.days);
+      document.getElementById('mPostponeDate').value=_postponeSelectedDate;
+      chips.querySelectorAll('.date-chip').forEach(x=>x.classList.remove('selected'));
+      c.classList.add('selected');
+    };
+    chips.appendChild(c);
+  });
+  document.getElementById('overlayPostpone').classList.add('open');
+}
+function savePostpone(){
+  const date=document.getElementById('mPostponeDate').value.trim();
+  if(!date){alert('Укажите новый срок');return;}
+  const{objId,n}=_postponeKey;
+  const t=getObj(objId).tasks.find(x=>x.n===n);
+  t.date=date;
+  t.postpones=(t.postpones||0)+1;
+  saveState();closeModal('overlayPostpone');renderObjects();buildSidebar();
+}
+
+// Roles
+function openRolesModal(objId){
+  _rolesObjId=objId;
+  const obj=getObj(objId);
+  document.getElementById('mRolesObjName').textContent=obj.name;
+  document.getElementById('mGip').value=obj.gip||'';
+  document.getElementById('mRp').value=obj.rp||'';
+  const as=getAllAssignees().map(a=>`<option value="${a}">`).join('');
+  document.getElementById('whoList2').innerHTML=as;
+  document.getElementById('whoList3').innerHTML=as;
+  document.getElementById('overlayRoles').classList.add('open');
+}
+function saveRoles(){
+  const obj=getObj(_rolesObjId);
+  obj.gip=document.getElementById('mGip').value.trim();
+  obj.rp=document.getElementById('mRp').value.trim();
+  saveState();closeModal('overlayRoles');renderObjects();buildSidebar();
+}
+
+// Add Object
+function openAddObjModal(){
+  ['mObjName','mObjGip','mObjRp'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mObjType').value='';
+  document.getElementById('mObjName').classList.remove('error');
+  const as=getAllAssignees().map(a=>`<option value="${a}">`).join('');
+  document.getElementById('whoList4').innerHTML=as;
+  document.getElementById('whoList5').innerHTML=as;
+  document.getElementById('overlayAddObj').classList.add('open');
+  setTimeout(()=>document.getElementById('mObjName').focus(),60);
+}
+function saveNewObject(){
+  const name=document.getElementById('mObjName').value.trim();
+  if(!name){document.getElementById('mObjName').classList.add('error');document.getElementById('mObjName').focus();setTimeout(()=>document.getElementById('mObjName').classList.remove('error'),1800);return;}
+  const gip=document.getElementById('mObjGip').value.trim();
+  const rp=document.getElementById('mObjRp').value.trim();
+  const type=document.getElementById('mObjType').value;
+  const maxId=Math.max(...state.objects.map(o=>o.id));
+  const obj={id:maxId+1,name,gip,rp,stop:type==='stop',org:type==='org',tasks:[]};
+  state.objects.push(obj);
+  saveState();closeModal('overlayAddObj');buildSidebar();buildFilters();renderObjects();
+  setTimeout(()=>setObjFilter(obj.id),100);
+}
+
+// Lock
+function lockProtocol(){
+  state.locked=true;
+  const snap=JSON.parse(JSON.stringify(state));
+  history.push(snap);
+  saveHistory();saveState();
+  closeModal('overlayLock');
+  updateTopbar();renderHistory();renderObjects();buildSidebar();
+}
+
+// New proto
+function openNewProtoModal(){
+  const next=state.protoNum+1;
+  document.getElementById('mProtoNum').value=next;
+  const today=new Date();
+  const dtt=(2-today.getDay()+7)%7||7;
+  const tue=new Date(today); tue.setDate(today.getDate()+dtt);
+  document.getElementById('mProtoDate').value=`${String(tue.getDate()).padStart(2,'0')}.${String(tue.getMonth()+1).padStart(2,'0')}.${tue.getFullYear()}`;
+  document.getElementById('newProtoInfo').innerHTML=`<strong>Текущий протокол №${state.protoNum}</strong> ${state.locked?'закрыт':'ещё открыт'}.<br>Все объекты перенесутся. Выполненные задачи будут удалены.`;
+  document.getElementById('overlayNewProto').classList.add('open');
+}
+function createNewProto(){
+  const num=document.getElementById('mProtoNum').value.trim();
+  const date=document.getElementById('mProtoDate').value.trim();
+  if(!num||!date){alert('Заполните номер и дату');return;}
+  if(!state.locked){const snap=JSON.parse(JSON.stringify(state));history.push(snap);saveHistory();}
+  // Carry over objects, remove done tasks, reset postpones counter for clean slate
+  const newObjs=JSON.parse(JSON.stringify(state.objects)).map(o=>{
+    o.tasks=o.tasks.filter(t=>!t.done);
+    o.tasks.forEach((t,i)=>t.n=i+1);
+    return o;
+  });
+  state={protoNum:parseInt(num),protoDate:date,locked:false,objects:newObjs};
+  saveState();
+  closeModal('overlayNewProto');
+  filterWho='all';filterObj='all';filterOverdue=false;searchQ='';
+  updateTopbar();buildSidebar();buildFilters();renderObjects();renderHistory();
+}
+
+// PDF
+function printPDF(){window.print();}
+
+// ══════════════════════════════════════════════
+//  KEYBOARD & ESC
+// ══════════════════════════════════════════════
+const allOverlays=['overlayTask','overlayComment','overlayPostpone','overlayRoles','overlayAddObj','overlayNewProto','overlayLock','overlayHistoryView'];
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') allOverlays.forEach(id=>closeModal(id));
+  if(e.key==='Enter'&&document.getElementById('overlayTask').classList.contains('open')&&document.activeElement.tagName!=='TEXTAREA') saveTask();
+});
+allOverlays.forEach(id=>{
+  document.getElementById(id).addEventListener('click',e=>{if(e.target===document.getElementById(id))closeModal(id);});
+});
+document.getElementById('searchInput').addEventListener('input',e=>{searchQ=e.target.value.toLowerCase();renderObjects();});
+document.getElementById('btnNewProto').addEventListener('click',openNewProtoModal);
+
+// ══════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════
+updateTopbar();
+buildSidebar();
+buildFilters();
+renderObjects();
+renderHistory();
+
+
+// ══════════════════════════════════════════════
+//  HISTORY VIEWER
+// ══════════════════════════════════════════════
+let _historyViewData=null;
+
+function openHistoryView(historyData){
+  _historyViewData=historyData;
+  document.getElementById('hvTitle').textContent=`Протокол №${historyData.protoNum} от ${historyData.protoDate} (архив)`;
+  
+  // Build sidebar
+  const sb=document.getElementById('hvSidebar');
+  sb.innerHTML='';
+  const items=[];
+  historyData.objects.filter(o=>!o.stop&&!o.org).forEach(o=>{
+    const it=document.createElement('div');
+    it.className='hv-item';
+    it.innerHTML=`<span class="si-num">${String(o.id).padStart(2,'0')}</span><span class="si-name">${o.name}</span>`;
+    items.push({el:it,objId:o.id});
+    sb.appendChild(it);
+  });
+  
+  // Separator
+  const sep=document.createElement('div');
+  sep.style='height:1px;background:var(--border);margin:4px 0;';
+  sb.appendChild(sep);
+  
+  historyData.objects.filter(o=>o.stop).forEach(o=>{
+    const it=document.createElement('div');
+    it.className='hv-item';
+    it.innerHTML=`<span class="si-num">${String(o.id).padStart(2,'0')}</span><span class="si-name">${o.name}</span>`;
+    items.push({el:it,objId:o.id});
+    sb.appendChild(it);
+  });
+  
+  historyData.objects.filter(o=>o.org).forEach(o=>{
+    const it=document.createElement('div');
+    it.className='hv-item';
+    it.innerHTML=`<span class="si-num">${String(o.id).padStart(2,'0')}</span><span class="si-name">${o.name}</span>`;
+    items.push({el:it,objId:o.id});
+    sb.appendChild(it);
+  });
+  
+  // Set first item as active
+  if(items.length>0){
+    items[0].el.classList.add('active');
+  }
+  
+  // Render main area
+  const main=document.getElementById('hvMainArea');
+  main.innerHTML='';
+  historyData.objects.forEach((obj,idx)=>{
+    const card=document.createElement('div');
+    card.className='hv-obj-card';
+    card.innerHTML=`
+      <div class="hv-obj-head">
+        <div class="hv-obj-name">${obj.name}</div>
+        <div class="hv-obj-meta">${obj.tasks.length} задач${obj.gip?` · ГИП: ${obj.gip}`:''}${obj.rp?` · РП: ${obj.rp}`:''}</div>
+      </div>
+    `;
+    
+    if(obj.tasks.length>0){
+      const tasksDiv=document.createElement('div');
+      obj.tasks.forEach(t=>{
+        const row=document.createElement('div');
+        row.className='hv-task-row'+(t.done?' done-row':'');
+        const dpill=t.date?`<span class="dpill" style="font-size:10px;padding:2px 7px;background:var(--bg);border-radius:3px;">${t.date}</span>`:'<span style="color:var(--text3);">—</span>';
+        row.innerHTML=`
+          <div class="hv-task-n">${t.n}</div>
+          <div class="hv-task-text">${t.task}</div>
+          <div class="hv-task-who">${t.who||'—'}</div>
+          <div class="hv-task-date">${dpill}</div>
+        `;
+        tasksDiv.appendChild(row);
+      });
+      card.appendChild(tasksDiv);
+    } else {
+      const empty=document.createElement('div');
+      empty.className='hv-empty-msg';
+      empty.textContent='Нет задач';
+      card.appendChild(empty);
+    }
+    
+    main.appendChild(card);
+  });
+  
+  document.getElementById('overlayHistoryView').classList.add('open');
+}
+
+function closeHistoryView(){
+  _historyViewData=null;
+  document.getElementById('overlayHistoryView').classList.remove('open');
+}
+</script>
+</body>
+</html>
