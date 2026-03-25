@@ -552,12 +552,30 @@ function fbFix(obj){
   return out;
 }
 
+// Firebase drops empty arrays entirely. Ensure all objects have tasks:[]
+function fbEnsureTasks(data){
+  if(!data) return data;
+  // Fix state object
+  if(data.objects && Array.isArray(data.objects)){
+    data.objects.forEach(function(o){if(!o.tasks) o.tasks=[];});
+  }
+  // Fix history array
+  if(Array.isArray(data)){
+    data.forEach(function(h){
+      if(h && h.objects && Array.isArray(h.objects)){
+        h.objects.forEach(function(o){if(!o.tasks) o.tasks=[];});
+      }
+    });
+  }
+  return data;
+}
+
 async function fbGet(path){
   try{
     const r=await fetch(FB_URL+'/'+path+'.json');
     if(!r.ok) return null;
     const d=await r.json();
-    return d!==null?fbFix(d):null;
+    return d!==null?fbEnsureTasks(fbFix(d)):null;
   }catch(e){console.warn('Firebase GET error:',e);return null;}
 }
 async function fbPut(path,data){
@@ -1953,16 +1971,22 @@ let _syncTimer=null;
 async function syncFromCloud(){
   try{
     const cs=await fbGet('state');
-    if(cs && Array.isArray(cs.objects) && JSON.stringify(cs)!==JSON.stringify(state)){
-      state=cs;
-      localStorage.setItem(SK,JSON.stringify(state));
-      updateTopbar();buildSidebar();buildFilters();renderObjects();
+    if(cs && Array.isArray(cs.objects)){
+      fbEnsureTasks(cs);
+      if(JSON.stringify(cs)!==JSON.stringify(state)){
+        state=cs;
+        localStorage.setItem(SK,JSON.stringify(state));
+        updateTopbar();buildSidebar();buildFilters();renderObjects();
+      }
     }
     const ch=await fbGet('history');
-    if(ch && Array.isArray(ch) && JSON.stringify(ch)!==JSON.stringify(history)){
-      history=ch;
-      localStorage.setItem(SK_H,JSON.stringify(history));
-      renderHistory();
+    if(ch && Array.isArray(ch)){
+      fbEnsureTasks(ch);
+      if(JSON.stringify(ch)!==JSON.stringify(history)){
+        history=ch;
+        localStorage.setItem(SK_H,JSON.stringify(history));
+        renderHistory();
+      }
     }
   }catch(e){console.warn('Sync error:',e);}
 }
@@ -1975,6 +1999,8 @@ async function initApp(){
     console.warn('State corrupted, resetting from INIT');
     state = JSON.parse(JSON.stringify(INIT));
   }
+  // Ensure all objects have tasks array (Firebase drops empty [])
+  fbEnsureTasks(state);
   // Load history from cloud
   const cloudH = await fbGet('history');
   if(cloudH && Array.isArray(cloudH)){
@@ -1988,6 +2014,8 @@ async function initApp(){
   }
   // Validate each history entry
   history = history.filter(h=>h && h.protoNum && Array.isArray(h.objects));
+  // Ensure all history objects have tasks array
+  fbEnsureTasks(history);
   // Ensure locked INIT is in history
   if(INIT.locked){
     const snap=JSON.parse(JSON.stringify(INIT));
@@ -2316,8 +2344,8 @@ function renderHistory(){
   if(!history.length){cnt.textContent='Нет закрытых протоколов';list.innerHTML='<div class="hp-empty">История пуста.<br>После закрытия протокол<br>сохранится здесь.</div>';return;}
   cnt.textContent=`${history.length} в архиве`;
   [...history].reverse().forEach(h=>{
-    const total=h.objects.reduce((s,o)=>s+o.tasks.length,0);
-    const done=h.objects.reduce((s,o)=>s+o.tasks.filter(t=>t.done).length,0);
+    const total=h.objects.reduce((s,o)=>s+(o.tasks||[]).length,0);
+    const done=h.objects.reduce((s,o)=>s+(o.tasks||[]).filter(t=>t.done).length,0);
     const it=document.createElement('div');
     it.className='hp-item';
     it.innerHTML=`<div class="hp-num">Протокол №${h.protoNum}</div><div class="hp-date">от ${h.protoDate}</div><div class="hp-meta">${total} задач · ${done} выполнено · ${h.objects.filter(o=>o.stop).length} на стопе</div>`;
