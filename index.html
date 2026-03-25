@@ -534,12 +534,30 @@ const SK = 'gip_state_v8';
 const SK_H = 'gip_history_v8';
 const FB_URL = 'https://gip-protokol-default-rtdb.europe-west1.firebasedatabase.app';
 
+// Firebase returns objects with numeric keys instead of arrays.
+// This function recursively converts them back to proper JS arrays.
+function fbFix(obj){
+  if(obj===null||obj===undefined||typeof obj!=='object') return obj;
+  // Check if this object should be an array (has consecutive numeric keys starting from 0)
+  const keys=Object.keys(obj);
+  const isArr=keys.length>0 && keys.every((k,i)=>String(i)===k);
+  if(isArr){
+    const arr=[];
+    for(let i=0;i<keys.length;i++) arr.push(fbFix(obj[i]));
+    return arr;
+  }
+  // Regular object — recurse into values
+  const out={};
+  for(const k of keys) out[k]=fbFix(obj[k]);
+  return out;
+}
+
 async function fbGet(path){
   try{
     const r=await fetch(FB_URL+'/'+path+'.json');
     if(!r.ok) return null;
     const d=await r.json();
-    return d;
+    return d!==null?fbFix(d):null;
   }catch(e){console.warn('Firebase GET error:',e);return null;}
 }
 async function fbPut(path,data){
@@ -1910,9 +1928,11 @@ const INIT = {
 function loadStateLocal(){try{const r=localStorage.getItem(SK);return r?JSON.parse(r):null;}catch(e){return null;}}
 async function loadState(){
   const cloud=await fbGet('state');
-  if(cloud){localStorage.setItem(SK,JSON.stringify(cloud));return cloud;}
+  if(cloud && cloud.protoNum && Array.isArray(cloud.objects)){
+    localStorage.setItem(SK,JSON.stringify(cloud));return cloud;
+  }
   const loc=loadStateLocal();
-  if(loc) return loc;
+  if(loc && loc.protoNum && Array.isArray(loc.objects)) return loc;
   return JSON.parse(JSON.stringify(INIT));
 }
 function saveState(){
@@ -1933,13 +1953,13 @@ let _syncTimer=null;
 async function syncFromCloud(){
   try{
     const cs=await fbGet('state');
-    if(cs && JSON.stringify(cs)!==JSON.stringify(state)){
+    if(cs && Array.isArray(cs.objects) && JSON.stringify(cs)!==JSON.stringify(state)){
       state=cs;
       localStorage.setItem(SK,JSON.stringify(state));
       updateTopbar();buildSidebar();buildFilters();renderObjects();
     }
     const ch=await fbGet('history');
-    if(ch && JSON.stringify(ch)!==JSON.stringify(history)){
+    if(ch && Array.isArray(ch) && JSON.stringify(ch)!==JSON.stringify(history)){
       history=ch;
       localStorage.setItem(SK_H,JSON.stringify(history));
       renderHistory();
@@ -1950,28 +1970,32 @@ async function syncFromCloud(){
 // Async init
 async function initApp(){
   state = await loadState();
+  // Validate state — if objects is not an array, data is corrupted
+  if(!state || !Array.isArray(state.objects)){
+    console.warn('State corrupted, resetting from INIT');
+    state = JSON.parse(JSON.stringify(INIT));
+  }
   // Load history from cloud
   const cloudH = await fbGet('history');
-  if(cloudH){
+  if(cloudH && Array.isArray(cloudH)){
     history = cloudH;
     localStorage.setItem(SK_H,JSON.stringify(history));
   } else {
-    try{const stored=localStorage.getItem(SK_H);if(stored){history=JSON.parse(stored);}}catch(e){}
+    try{const stored=localStorage.getItem(SK_H);if(stored){const p=JSON.parse(stored);if(Array.isArray(p))history=p;}}catch(e){}
   }
-  if(!history){
+  if(!history || !Array.isArray(history)){
     history = getDefaultHistory();
   }
+  // Validate each history entry
+  history = history.filter(h=>h && h.protoNum && Array.isArray(h.objects));
   // Ensure locked INIT is in history
   if(INIT.locked){
     const snap=JSON.parse(JSON.stringify(INIT));
     if(!history.find(h=>h.protoNum===snap.protoNum)) history.push(snap);
   }
-  // Upload initial data to cloud if empty
-  const testCloud = await fbGet('state');
-  if(!testCloud){
-    fbPut('state',state);
-    fbPut('history',history);
-  }
+  // Always sync clean data back to cloud
+  fbPut('state',state);
+  fbPut('history',history);
   // Render UI
   updateTopbar();
   buildSidebar();
