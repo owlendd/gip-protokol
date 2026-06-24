@@ -2545,7 +2545,10 @@ document.getElementById('btnNewProto').addEventListener('click',openNewProtoModa
 // ══════════════════════════════════════════════
 //  INIT (async — loads from cloud first)
 // ══════════════════════════════════════════════
-initApp();
+function installDateInput(id){var el=document.getElementById(id);if(!el||el.dataset.dateInstalled)return;el.dataset.dateInstalled='1';el.addEventListener('input',function(){var raw=el.value.replace(/[^0-9]/g,'').slice(0,6);var f=raw;if(raw.length>2)f=raw.slice(0,2)+'.'+raw.slice(2);if(raw.length>4)f=raw.slice(0,2)+'.'+raw.slice(2,4)+'.'+raw.slice(4);el.value=f;});var w=document.createElement('div');w.style.cssText='display:flex;gap:4px;align-items:stretch;';el.parentNode.insertBefore(w,el);w.appendChild(el);el.style.flex='1';var b=document.createElement('button');b.type='button';b.textContent=String.fromCodePoint(0x1F4C5);b.style.cssText='background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:0 10px;cursor:pointer;font-size:14px;';b.onclick=function(){openDatePicker(id);};w.appendChild(b);}
+  function openDatePicker(targetId){var t=document.getElementById(targetId);if(!t)return;var cur='';var m=(t.value||'').match(/^([0-9]{1,2})\.([0-9]{1,2})\.([0-9]{2,4})$/);if(m){var y=m[3].length===2?'20'+m[3]:m[3];cur=y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');}var dp=document.createElement('input');dp.type='date';if(cur)dp.value=cur;dp.style.cssText='position:fixed;left:0;top:0;opacity:0;width:1px;height:1px;';dp.onchange=function(){if(dp.value){var p=dp.value.split('-');t.value=p[2]+'.'+p[1]+'.'+p[0].slice(2);t.dispatchEvent(new Event('input',{bubbles:true}));}dp.remove();};document.body.appendChild(dp);if(dp.showPicker){try{dp.showPicker();}catch(e){dp.click();}}else{dp.click();}}
+  ['mDate','mPostponeDate'].forEach(installDateInput);
+  initApp();
 
 
 // ══════════════════════════════════════════════
