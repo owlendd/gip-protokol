@@ -2033,7 +2033,7 @@ async function initApp(){
   }
   // Always sync clean data back to cloud
   fbPut('state',state);
-  fbPut('history',history);
+    saveHistory();
   // Render UI
   updateTopbar();
   buildSidebar();
