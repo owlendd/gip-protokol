@@ -613,6 +613,10 @@ tr:hover .row-actions{opacity:1;}
 // ══════════════════════════════════════════════
 //  STORAGE (Firebase + localStorage fallback)
 // ══════════════════════════════════════════════
+// Отметка версии. Её подставляет build.sh при сборке боевого файла,
+// чтобы по футеру можно было понять, обновился сайт или нет.
+const BUILD = '04.09.2026 14:49';
+
 const SK = 'gip_state_v8';
 const SK_H = 'gip_history_v8';
 const FB_URL = 'https://gip-protokol-default-rtdb.europe-west1.firebasedatabase.app';
@@ -2255,7 +2259,7 @@ function updateTopbar(){
   if(state.locked){btn.textContent='🔒 Закрыт';btn.className='tbtn tbtn-locked';btn.onclick=null;}
   else{btn.textContent='✓ Закрыть протокол';btn.className='tbtn tbtn-primary';btn.onclick=()=>document.getElementById('overlayLock').classList.add('open');}
   document.getElementById('lockedBanner').style.display=state.locked?'block':'none';
-  document.getElementById('appFooter').textContent=`Протокол №${state.protoNum} от ${state.protoDate} · Присутствовали: Камбулатов, Анацкая, Чанышев, Шарафутдинов, Ханов, Курбангалиев, Галин, Станишевская, Грушин, Федорова, Седунов, Галиев`;
+  document.getElementById('appFooter').textContent=`Протокол №${state.protoNum} от ${state.protoDate} · Присутствовали: Камбулатов, Анацкая, Чанышев, Шарафутдинов, Ханов, Курбангалиев, Галин, Станишевская, Грушин, Федорова, Седунов, Галиев · версия: ${BUILD}`;
 }
 
 // ══════════════════════════════════════════════
