@@ -155,7 +155,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:13
 .task-comment{font-size:11px;color:var(--text3);font-style:italic;}
 .td-who{font-family:var(--mono);font-size:11px;color:var(--accent);white-space:nowrap;width:130px;}
 .td-date{font-family:var(--mono);font-size:11px;white-space:nowrap;width:115px;}
-.td-actions{width:74px;white-space:nowrap;}
+.td-actions{width:104px;white-space:nowrap;}
 .dpill{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:4px;font-size:11px;}
 .dpill.ok{background:var(--green-bg);color:var(--green);}
 .dpill.soon{background:var(--orange-bg);color:var(--orange);}
@@ -199,6 +199,7 @@ tr:hover .row-actions{opacity:1;}
 @keyframes slideIn{from{opacity:0;transform:translateY(-8px) scale(.98);}to{opacity:1;transform:translateY(0) scale(1);}}
 .modal.sm{width:400px;}
 .modal.md{width:460px;}
+.modal.lg{width:680px;}
 .modal-hd{display:flex;align-items:flex-start;justify-content:space-between;padding:15px 18px 12px;border-bottom:1px solid var(--border);}
 .modal-hd-title{font-size:14px;font-weight:600;color:var(--text);}
 .modal-hd-sub{font-size:11px;color:var(--accent);font-family:var(--mono);margin-top:3px;max-width:340px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -214,6 +215,32 @@ tr:hover .row-actions{opacity:1;}
 .f-row{display:flex;gap:11px;}
 .f-row>div{flex:1;}
 .f-hint{font-size:11px;color:var(--text3);margin-top:4px;}
+
+/* --- v2: журнал изменений и редактирование задачи --- */
+.rbtn.edit-btn:hover{border-color:var(--purple);color:var(--purple);background:var(--purple-bg);}
+.postpone-cnt{cursor:pointer;transition:all .12s;}
+.postpone-cnt:hover{background:#ffedd5;border-color:var(--orange);}
+.log-badge{display:inline-flex;align-items:center;font-family:var(--mono);font-size:9px;color:var(--text3);background:var(--surface2);border:1px solid var(--border);padding:1px 5px;border-radius:3px;margin-left:5px;cursor:pointer;transition:all .12s;}
+.log-badge:hover{color:var(--accent);border-color:var(--accent-light);background:var(--accent-bg);}
+.log-summary{display:flex;gap:10px;flex-wrap:wrap;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;}
+.log-sum-item{display:flex;flex-direction:column;gap:2px;min-width:96px;}
+.log-sum-lbl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);}
+.log-sum-val{font-size:12px;color:var(--text);font-weight:500;}
+.log-list{display:flex;flex-direction:column;gap:0;max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:6px;}
+.log-row{display:grid;grid-template-columns:132px 92px 1fr;gap:10px;align-items:baseline;padding:8px 12px;border-bottom:1px solid var(--border);font-size:12px;}
+.log-row:last-child{border-bottom:none;}
+.log-row.seed{background:var(--surface2);}
+.log-when{font-family:var(--mono);font-size:10px;color:var(--text3);white-space:nowrap;}
+.log-field{font-size:10px;padding:1px 6px;border-radius:3px;justify-self:start;white-space:nowrap;}
+.log-field.f-date{color:var(--orange);background:var(--orange-bg);border:1px solid #fed7aa;}
+.log-field.f-who{color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-light);}
+.log-field.f-task{color:var(--purple);background:var(--purple-bg);border:1px solid #ddd6fe;}
+.log-val-old{color:var(--text3);text-decoration:line-through;}
+.log-val-arrow{color:var(--text3);margin:0 5px;}
+.log-val-new{color:var(--text);font-weight:500;}
+.log-empty{padding:26px;text-align:center;color:var(--text3);font-size:12px;}
+.log-note{font-size:11px;color:var(--text2);background:var(--orange-bg);border:1px solid #fed7aa;border-radius:6px;padding:8px 11px;line-height:1.45;}
+.test-badge{background:var(--purple-bg);border:1px solid #ddd6fe;color:var(--purple);font-family:var(--mono);font-size:10px;padding:3px 9px;border-radius:4px;white-space:nowrap;letter-spacing:.05em;}
 .modal-ft{padding:11px 18px;border-top:1px solid var(--border);display:flex;gap:9px;justify-content:flex-end;}
 .btn-cancel{background:var(--bg);border:1px solid var(--border2);color:var(--text2);font-family:var(--sans);font-size:13px;padding:6px 16px;cursor:pointer;border-radius:6px;transition:all .12s;}
 .btn-cancel:hover{border-color:var(--text2);color:var(--text);}
@@ -380,6 +407,49 @@ tr:hover .row-actions{opacity:1;}
   </div>
 </div>
 
+<!-- MODAL: EDIT TASK -->
+<div class="overlay" id="overlayEditTask">
+  <div class="modal">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">Редактировать задачу</div><div class="modal-hd-sub" id="mEditObjName"></div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayEditTask')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div><label class="f-label">Задание *</label><input class="f-input" id="mEditTask" placeholder="Описание задачи..."></div>
+      <div class="f-row">
+        <div><label class="f-label">Исполнитель</label><input class="f-input" id="mEditWho" list="whoListEdit" placeholder="Фамилия..."><datalist id="whoListEdit"></datalist></div>
+        <div><label class="f-label">Срок исполнения</label><input class="f-input" id="mEditDate" placeholder="ДД.ММ.ГГ"></div>
+      </div>
+      <div><label class="f-label">Комментарий</label><textarea class="f-input f-textarea" id="mEditComment" placeholder="Дополнительные заметки..."></textarea></div>
+      <div class="f-hint">Изменения названия, исполнителя и срока попадут в историю задачи.
+        <a href="javascript:void(0)" id="mEditHistLink" style="color:var(--accent);text-decoration:none;">Посмотреть историю →</a>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayEditTask')">Отмена</button>
+      <button class="btn-primary" onclick="saveEditTask()">Сохранить</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: TASK HISTORY -->
+<div class="overlay" id="overlayTaskLog">
+  <div class="modal lg">
+    <div class="modal-hd">
+      <div><div class="modal-hd-title">История задачи</div><div class="modal-hd-sub" id="mLogTaskName"></div></div>
+      <button class="btn-mclose" onclick="closeModal('overlayTaskLog')">×</button>
+    </div>
+    <div class="modal-bd">
+      <div class="log-summary" id="mLogSummary"></div>
+      <div class="log-note" id="mLogNote" style="display:none"></div>
+      <div class="log-list" id="mLogList"></div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn-cancel" onclick="closeModal('overlayTaskLog')">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: COMMENT -->
 <div class="overlay" id="overlayComment">
   <div class="modal md">
@@ -526,6 +596,19 @@ tr:hover .row-actions{opacity:1;}
   </div>
 </div>
 
+<!-- ARCHIVE OVERLAY -->
+<div class="overlay-history-view" id="overlayArchive" onclick="if(event.target===this)closeArchiveView()">
+  <div class="history-view-container">
+    <div class="hv-header">
+      <div class="hv-title">📦 Архив проектов</div>
+      <button class="hv-close-btn" onclick="closeArchiveView()">×</button>
+    </div>
+    <div class="hv-content">
+      <div class="hv-main" id="archiveList"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ══════════════════════════════════════════════
 //  STORAGE (Firebase + localStorage fallback)
@@ -533,6 +616,10 @@ tr:hover .row-actions{opacity:1;}
 const SK = 'gip_state_v8';
 const SK_H = 'gip_history_v8';
 const FB_URL = 'https://gip-protokol-default-rtdb.europe-west1.firebasedatabase.app';
+// Тестовая версия работает с отдельной веткой данных.
+// Боевые /state и /history этой версии недоступны.
+const FB_STATE = 'state';
+const FB_HIST  = 'history';
 
 // Firebase returns objects with numeric keys instead of arrays.
 // This function recursively converts them back to proper JS arrays.
@@ -557,17 +644,44 @@ function fbEnsureTasks(data){
   if(!data) return data;
   // Fix state object
   if(data.objects && Array.isArray(data.objects)){
-    data.objects.forEach(function(o){if(!o.tasks) o.tasks=[];});
+    data.objects.forEach(function(o){if(!o.tasks) o.tasks=[];ensureLogs(o);});
   }
   // Fix history array
   if(Array.isArray(data)){
     data.forEach(function(h){
       if(h && h.objects && Array.isArray(h.objects)){
-        h.objects.forEach(function(o){if(!o.tasks) o.tasks=[];});
+        h.objects.forEach(function(o){if(!o.tasks) o.tasks=[];ensureLogs(o);});
       }
     });
   }
   return data;
+}
+
+// ══════════════════════════════════════════════
+//  ЖУРНАЛ ИЗМЕНЕНИЙ ЗАДАЧИ
+//  Запись: {at:ISO-строка|null, field:'task'|'who'|'date', from, to, seed?}
+//  at=null означает «значение было задано до внедрения журнала».
+//  Флаг logInit нужен потому, что Firebase выбрасывает пустые массивы:
+//  без него задача без изменений засеивалась бы заново при каждой загрузке.
+// ══════════════════════════════════════════════
+function ensureLogs(o){
+  if(!o || !Array.isArray(o.tasks)) return;
+  o.tasks.forEach(function(t){
+    if(!t) return;
+    if(!Array.isArray(t.log)) t.log=[];
+    if(!t.logInit){
+      if(t.date) t.log.push({at:null,field:'date',from:null,to:t.date,seed:true});
+      t.logInit=true;
+    }
+  });
+}
+
+function logChange(t,field,from,to){
+  if(!Array.isArray(t.log)) t.log=[];
+  if((from||'')===(to||'')) return false;
+  t.log.push({at:new Date().toISOString(),field:field,from:from||null,to:to||null});
+  t.logInit=true;
+  return true;
 }
 
 async function fbGet(path){
@@ -578,6 +692,17 @@ async function fbGet(path){
     return d!==null?fbEnsureTasks(fbFix(d)):null;
   }catch(e){console.warn('Firebase GET error:',e);return null;}
 }
+// Возвращает только количество элементов узла, не скачивая его содержимое.
+// Для history это 121 байт вместо 378 КБ.
+async function fbCount(path){
+  try{
+    const r=await fetch(FB_URL+'/'+path+'.json?shallow=true');
+    if(!r.ok) return null;
+    const d=await r.json();
+    return d?Object.keys(d).length:0;
+  }catch(e){return null;}
+}
+
 async function fbPut(path,data){
   try{
     await fetch(FB_URL+'/'+path+'.json',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
@@ -1945,7 +2070,7 @@ const INIT = {
 
 function loadStateLocal(){try{const r=localStorage.getItem(SK);return r?JSON.parse(r):null;}catch(e){return null;}}
 async function loadState(){
-  const cloud=await fbGet('state');
+  const cloud=await fbGet(FB_STATE);
   if(cloud && cloud.protoNum && Array.isArray(cloud.objects)){
     localStorage.setItem(SK,JSON.stringify(cloud));return cloud;
   }
@@ -1954,13 +2079,16 @@ async function loadState(){
   return JSON.parse(JSON.stringify(INIT));
 }
 function saveState(){
+  // Метка версии: по ней остальные вкладки понимают, что данные изменились,
+  // не скачивая при этом весь протокол на каждой проверке.
+  state.rev=Date.now();
   localStorage.setItem(SK,JSON.stringify(state));
-  fbPut('state',state);
+  fbPut(FB_STATE,state);
 }
 function getDefaultHistory(){return [{"protoNum": 2, "protoDate": "20.01.2026", "locked": true, "objects": [{"id": 1, "name": "Автосервис и автомойка Дема", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Забрать деньги", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 2, "name": "ТЦ Михайловка", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Подписать договор", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 3, "name": "Садик Иглино", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Доделать РД (АР)", "who": "Камбулатов", "date": "01.05.26", "done": false, "comment": "", "postpones": 2}, {"n": 2, "task": "Передать в объёме РД — АР", "who": "Анацкая", "date": "01.05.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 4, "name": "Школа Шмидтово", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Проверка и согласование сметной документации", "who": "Камбулатов", "date": "01.03.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 5, "name": "Булгаково. Литер 11", "gip": "Станишевская", "rp": "", "stop": true, "tasks": [{"n": 1, "task": "Подготовка к выдаче документации в стройнадзор", "who": "Станишевская", "date": "01.03.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 6, "name": "ЖД Рабкоров", "gip": "Станишевская", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Получить согласование стадии П, 2 этапа", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Зайти в экспертизу, 2 этап", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Оперативка с заказчиком по планировкам, осметить доп. работы", "who": "Ханов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 7, "name": "ЖК по ул. Суворова", "gip": "", "rp": "Чанышев", "stop": true, "tasks": [{"n": 1, "task": "Заключить доп. соглашение на РД", "who": "Чанышев", "date": "17.11.25", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Ждём согласования архитектуры", "who": "Чанышев", "date": "17.10.25", "done": false, "comment": "", "postpones": 1}]}, {"id": 8, "name": "ЖД Тольятти", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Корректировка РД (ЭМ, СПА)", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 4}, {"n": 2, "task": "Получить информацию по квартирам и сделать доп. соглашение", "who": "Шарафутдинов", "date": "03.02.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 9, "name": "Усадьба Бухартовских", "gip": "", "rp": "Шарафутдинов", "stop": true, "tasks": [{"n": 1, "task": "РД", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 10, "name": "МКД в с. Ольховое", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Получить оплату", "who": "Камбулатов", "date": "25.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 11, "name": "МКД в г. Благовещенск", "gip": "Станишевская", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Собрать все изменения по исполнительной", "who": "Станишевская", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Получить оплату", "who": "Чанышев", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 12, "name": "МКД по ул. Злобина — ГК САМОЛЁТ", "gip": "Курбангалиев", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Выдача разделов РД по графику (не выданы кровли)", "who": "Курбангалиев", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Отработка замечаний", "who": "Курбангалиев", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Корректировка ПД и прохождение экспертизы (отставание ~1 мес.)", "who": "Курбангалиев", "date": "30.05.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Провести оперативку по устройству генплана", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Указать комплект с максимальным отставанием", "who": "Курбангалиев", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Организовать выдачу АР, разбить сроки и задачи", "who": "Курбангалиев", "date": "31.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 7, "task": "План перемычек и отверстий (выдана только 8 секция)", "who": "Курбангалиев", "date": "27.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 8, "task": "Откорректированный ПСО", "who": "Курбангалиев", "date": "15.04.26", "done": false, "comment": "", "postpones": 0}, {"n": 9, "task": "Дополнительный архитектор в группу", "who": "Ханов", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 13, "name": "МКД в г. Бирск, Нелидова", "gip": "Грушин", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Получить оплату", "who": "Чанышев", "date": "31.11.25", "done": false, "comment": "", "postpones": 3}, {"n": 2, "task": "Отработать отказ от госэкспертизы", "who": "Грушин", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Решить вопрос по договору ГАЗ", "who": "Шарафутдинов", "date": "27.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 14, "name": "Автосалон на Рубежной", "gip": "Галин", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить заключение экспертизы по стадии П", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Разработать рабочую документацию", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Закрыть первый этап", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 15, "name": "Складской комплекс Уфанет в с. Миловка", "gip": "", "rp": "", "stop": true, "tasks": []}, {"id": 16, "name": "ППМ Кремлёвская / Б. Хмельницкого", "gip": "", "rp": "Чанышев", "stop": false, "tasks": [{"n": 1, "task": "Уточнить наличие закрывающих документов", "who": "Чанышев", "date": "07.01.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 17, "name": "ЖК на ул. Барамзиной, г. Пермь", "gip": "Станишевская", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить договор на следующий квартал", "who": "Шарафутдинов", "date": "01.03.26", "done": false, "comment": "", "postpones": 2}, {"n": 2, "task": "Подписать АКТ и получить оплату за РД", "who": "Шарафутдинов", "date": "10.02.26", "done": false, "comment": "", "postpones": 1}, {"n": 3, "task": "Подписать доп. соглашение №2", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 1}, {"n": 4, "task": "Собрать совещание с исполнителями", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 5, "task": "Данные по точкам подключений от заказчика", "who": "Шарафутдинов", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 6, "task": "Выдача рабочей документации", "who": "Станишевская", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 7, "task": "Выдать спецификации по КР", "who": "Станишевская", "date": "20.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 8, "task": "Получить письмо по корректировке ПОС", "who": "Шарафутдинов", "date": "26.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 9, "task": "Отправить подписанный график", "who": "Шарафутдинов", "date": "20.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 18, "name": "Литер 2 УСЗ (Дортранстрой)", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Встретиться с Динаром для обсуждения ТЗ. Подписать ТЗ", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Заключить доп. соглашение на АГО", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Согласовать техническое задание", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график по исполнителям", "who": "Ханов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Провести общую оперативку с исполнителями", "who": "Ханов", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Подготовить ПИРЫ по выносам сетей", "who": "Станишевская", "date": "22.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 19, "name": "Набережные Челны (Титан)", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей по разделам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Получить ИРД от заказчика", "who": "Шарафутдинов", "date": "02.01.26", "done": false, "comment": "", "postpones": 3}, {"n": 3, "task": "Составить график работ по этапам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 3}, {"n": 4, "task": "Получить согласование и решение по 1 этапу", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 20, "name": "МКД в г. Бирск — Интернациональная, 29/29А", "gip": "Шарафутдинов", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы по всем разделам", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Зайти в госэкспертизу", "who": "Шарафутдинов", "date": "06.02.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Передать материалы для КР", "who": "Галин", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график выдачи РД", "who": "Шарафутдинов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Составить график выдачи ПД", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 21, "name": "МКД в г. Бирск — Интернациональная, 27", "gip": "Шарафутдинов", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Запустить все работы по проекту", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 22, "name": "МКД в г. Бирск — ул. Балезина", "gip": "Шарафутдинов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Найти исполнителей и начать работы", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Зайти в госэкспертизу", "who": "Шарафутдинов", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Передать материалы для КР", "who": "Грушин", "date": "26.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Составить график выдачи РД", "who": "Шарафутдинов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Составить график выдачи ПД", "who": "Шарафутдинов", "date": "23.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 23, "name": "535 квартал", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Заключить договор. Презентация для градсовета", "who": "Ханов", "date": "30.01.26", "done": false, "comment": "", "postpones": 2}]}, {"id": 24, "name": "Лётчиков ППМ", "gip": "", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Ждём согласования от заказчика", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}]}, {"id": 25, "name": "Булгаково ППМ", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Провести оперативку", "who": "Шарафутдинов", "date": "13.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 26, "name": "Контора Булгаково", "gip": "", "rp": "Шарафутдинов", "stop": false, "tasks": [{"n": 1, "task": "Получить ИРД", "who": "Шарафутдинов", "date": "30.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 2, "task": "Получить аванс за работы", "who": "Шарафутдинов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Решить что делаем с объектом дальше", "who": "Шарафутдинов", "date": "22.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 27, "name": "Благовещенск ТИТАН", "gip": "", "rp": "Ханов", "stop": false, "tasks": [{"n": 1, "task": "Подписать договор поручительства", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Найти исполнителей на работы", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 3, "task": "Получить ИРД", "who": "Ханов", "date": "28.01.26", "done": false, "comment": "", "postpones": 1}, {"n": 4, "task": "Согласовать типовой этаж", "who": "Ханов", "date": "30.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 28, "name": "Авангард", "gip": "Камбулатов", "rp": "", "stop": false, "tasks": [{"n": 1, "task": "Уточнить объём обследования и обмер зданий", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Подписать договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "Составить список исполнителей, РП и ГП", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Согласовать техническое задание", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Проверка договора", "who": "Камбулатов", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}]}, {"id": 29, "name": "Организационные вопросы", "gip": "", "rp": "", "org": true, "stop": false, "tasks": []}, {"id": 30, "name": "Концепции", "gip": "", "rp": "", "org": true, "stop": false, "tasks": [{"n": 1, "task": "ЖК Сириус — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 2, "task": "Инвестчас в г. Нижнекамск — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 3, "task": "КРТ на Затонском кольце — посадка, концепция", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 4, "task": "Апартаменты по ул. Авроры — посадка, концепция, договор", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}, {"n": 5, "task": "Уфанет бизнес-центр: размещение, стройгенплан, объём", "who": "", "date": "21.01.26", "done": false, "comment": "", "postpones": 0}, {"n": 6, "task": "Детский сад в с. Иглино — посадка и зональная планировка", "who": "", "date": null, "done": false, "comment": "", "postpones": 0}]}], "savedAt": "2026-03-19T08:30:35.702937"}];}
 async function saveHistory(){
     try{
-          const cloud=await fbGet('history');
+          const cloud=await fbGet(FB_HIST);
           if(Array.isArray(cloud) && cloud.length > (history?.length||0)){
                   console.warn('saveHistory: cloud has',cloud.length,'we have',history?.length,'- adopting cloud, refusing to shrink.');
                   history=cloud;
@@ -1970,7 +2098,7 @@ async function saveHistory(){
           }
     }catch(e){console.warn('saveHistory cloud check failed:',e);}
     localStorage.setItem(SK_H,JSON.stringify(history));
-    fbPut('history',history);
+    fbPut(FB_HIST,history);
 }
 
 let state = null;
@@ -1980,22 +2108,37 @@ let history = null;
 let _syncTimer=null;
 async function syncFromCloud(){
   try{
-    const cs=await fbGet('state');
-    if(cs && Array.isArray(cs.objects)){
-      fbEnsureTasks(cs);
-      if(JSON.stringify(cs)!==JSON.stringify(state)){
-        state=cs;
-        localStorage.setItem(SK,JSON.stringify(state));
-        updateTopbar();buildSidebar();buildFilters();renderObjects();
+    // --- Протокол ---
+    // Сначала спрашиваем только метку версии (13 байт вместо 31 КБ).
+    // Если метки в облаке нет, значит писала старая версия приложения —
+    // тогда, как раньше, качаем целиком, чтобы ничего не пропустить.
+    const rev=await fbGet(FB_STATE+'/rev');
+    if(rev===null||rev===undefined||(rev||0)!==(state&&state.rev||0)){
+      const cs=await fbGet(FB_STATE);
+      if(cs && Array.isArray(cs.objects)){
+        fbEnsureTasks(cs);
+        if(JSON.stringify(cs)!==JSON.stringify(state)){
+          state=cs;
+          localStorage.setItem(SK,JSON.stringify(state));
+          updateTopbar();buildSidebar();buildFilters();renderObjects();
+        }
       }
     }
-    const ch=await fbGet('history');
-    if(ch && Array.isArray(ch)){
-      fbEnsureTasks(ch);
-      if(JSON.stringify(ch)!==JSON.stringify(history)){
-        history=ch;
-        localStorage.setItem(SK_H,JSON.stringify(history));
-        renderHistory();
+
+    // --- История ---
+    // Меняется только при закрытии протокола, то есть примерно раз в месяц.
+    // Спрашиваем количество записей (121 байт вместо 378 КБ)
+    // и качаем целиком, только если оно изменилось.
+    const cnt=await fbCount(FB_HIST);
+    if(cnt!==null && cnt!==(history?history.length:0)){
+      const ch=await fbGet(FB_HIST);
+      if(ch && Array.isArray(ch)){
+        fbEnsureTasks(ch);
+        if(JSON.stringify(ch)!==JSON.stringify(history)){
+          history=ch;
+          localStorage.setItem(SK_H,JSON.stringify(history));
+          renderHistory();
+        }
       }
     }
   }catch(e){console.warn('Sync error:',e);}
@@ -2012,7 +2155,7 @@ async function initApp(){
   // Ensure all objects have tasks array (Firebase drops empty [])
   fbEnsureTasks(state);
   // Load history from cloud
-  const cloudH = await fbGet('history');
+  const cloudH = await fbGet(FB_HIST);
   if(cloudH && Array.isArray(cloudH)){
     history = cloudH;
     localStorage.setItem(SK_H,JSON.stringify(history));
@@ -2032,7 +2175,7 @@ async function initApp(){
     if(!history.find(h=>h.protoNum===snap.protoNum)) history.push(snap);
   }
   // Always sync clean data back to cloud
-  fbPut('state',state);
+  fbPut(FB_STATE,state);
     saveHistory();
   // Render UI
   updateTopbar();
@@ -2080,8 +2223,24 @@ function fmtDate(dt){
 function addDays(n){const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()+n); return fmtDate(d);}
 function getAllAssignees(){
   const s=new Set();
-  state.objects.forEach(o=>o.tasks.forEach(t=>{if(t.who)s.add(t.who);}));
+  state.objects.forEach(o=>{
+    if(o.gip)s.add(o.gip);
+    if(o.rp)s.add(o.rp);
+    o.tasks.forEach(t=>{if(t.who)s.add(t.who);});
+  });
   return Array.from(s).sort();
+}
+
+// Приводит введённую фамилию к тому написанию, которое уже есть в протоколе.
+// Без этого «ханов» и «Ханов» жили бы как два разных исполнителя
+// и попадали в фильтр отдельными кнопками.
+function nameKey(v){return (v||'').toLowerCase().replace(/ё/g,'е');}
+function normalizeName(v){
+  v=(v||'').trim().replace(/\s+/g,' ');
+  if(!v) return '';
+  const k=nameKey(v);
+  const hit=getAllAssignees().find(a=>nameKey(a)===k);
+  return hit||v;
 }
 function getObj(id){return state.objects.find(o=>o.id===id);}
 
@@ -2127,9 +2286,23 @@ function buildSidebar(){
     sb.appendChild(sec);
     const d=document.createElement('div'); d.className='sb-div'; sb.appendChild(d);
   }
-  grp('Объекты',state.objects.filter(o=>!o.stop&&!o.org));
-  grp('На стопе',state.objects.filter(o=>o.stop));
-  grp('Прочее',state.objects.filter(o=>o.org));
+  grp('Объекты',state.objects.filter(o=>!o.stop&&!o.org&&!o.archived));
+  grp('На стопе',state.objects.filter(o=>o.stop&&!o.archived));
+  grp('Прочее',state.objects.filter(o=>o.org&&!o.archived));
+  // Archive section in sidebar
+  const arch=state.objects.filter(o=>o.archived);
+  if(arch.length){
+    const asec=document.createElement('div'); asec.className='sb-section';
+    const lbl=document.createElement('span'); lbl.className='sb-label'; lbl.textContent='📦 Архив'; asec.appendChild(lbl);
+    const ait=document.createElement('div'); ait.className='sb-item';
+    const num=document.createElement('span'); num.className='si-num'; num.textContent='·';
+    const nm=document.createElement('span'); nm.className='si-name'; nm.textContent='Открыть архив';
+    const cnt=document.createElement('span'); cnt.className='si-cnt'; cnt.textContent=arch.length;
+    ait.append(num,nm,cnt);
+    ait.onclick=openArchiveView;
+    asec.appendChild(ait);
+    sb.appendChild(asec);
+  }
 
   // Add object button
   if(!state.locked){
@@ -2228,7 +2401,10 @@ function renderObjects(){
             const dp=t.date
               ? `<span class="dpill ${t.done?'':st}">${st==='overdue'&&!t.done?'⚠ ':''}${t.date}</span>`
               : `<span style="color:var(--text3)">—</span>`;
-            const pCnt=t.postpones>0?`<span class="postpone-cnt">↷${t.postpones}</span>`:'';
+            const logCnt=(t.log||[]).filter(L=>!L.seed).length;
+            const pCnt=t.postpones>0
+              ? `<span class="postpone-cnt" title="Перенесён ${t.postpones} раз(а). Открыть историю" data-obj="${obj.id}" data-n="${t.n}" data-action="log">↷${t.postpones}</span>`
+              : (logCnt>0?`<span class="log-badge" title="Открыть историю изменений" data-obj="${obj.id}" data-n="${t.n}" data-action="log">🕘${logCnt}</span>`:'');
             const commentHTML=t.comment?`<div class="task-comment">💬 ${t.comment}</div>`:'';
             const rowCls=t.done?'done-row':'';
             const checkCls=t.done?'check-box checked':'check-box';
@@ -2239,6 +2415,7 @@ function renderObjects(){
                   ? `<button class="rbtn undone-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="undone">↩ Вернуть</button>`
                   : `<button class="rbtn done-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="done">✓ Готово</button>
                      <button class="rbtn postpone-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="postpone">↷ Перенести</button>
+                     <button class="rbtn edit-btn" title="Редактировать задачу" data-obj="${obj.id}" data-n="${t.n}" data-action="edit">✎</button>
                      <button class="rbtn comment-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="comment">💬</button>`
                 }
                 <button class="rbtn del-btn" data-obj="${obj.id}" data-n="${t.n}" data-action="del">×</button>
@@ -2272,6 +2449,7 @@ function renderObjects(){
           <div class="head-actions" onclick="event.stopPropagation()">
             ${!state.locked?`
               <button class="bha roles-btn" data-obj="${obj.id}">👤 Роли</button>
+              ${canArchive(obj)?`<button class="bha" data-archive="${obj.id}">📦 В архив</button>`:''}
               <button class="bha ${obj.stop?'stop-off':'stop-on'}" data-stop="${obj.id}">${obj.stop?'▶ Снять стоп':'⏸ На стоп'}</button>
             `:''}
           </div>
@@ -2285,7 +2463,7 @@ function renderObjects(){
               <th>Задание</th>
               <th style="width:130px">Исполнитель</th>
               <th style="width:115px">Срок</th>
-              <th style="width:74px"></th>
+              <th style="width:104px"></th>
             </tr></thead>
             <tbody>${rowsHTML}</tbody>
           </table>
@@ -2300,6 +2478,8 @@ function renderObjects(){
       if(stopBtn) stopBtn.addEventListener('click',e=>{e.stopPropagation();const o=getObj(parseInt(stopBtn.dataset.stop));o.stop=!o.stop;saveState();buildSidebar();renderObjects();});
       const rolesBtn=card.querySelector('.roles-btn');
       if(rolesBtn) rolesBtn.addEventListener('click',e=>{e.stopPropagation();openRolesModal(obj.id);});
+      const archBtn=card.querySelector('[data-archive]');
+      if(archBtn) archBtn.addEventListener('click',e=>{e.stopPropagation();archiveObj(parseInt(archBtn.dataset.archive));});
 
       // Add task
       const addBtn=card.querySelector('.btn-add');
@@ -2319,6 +2499,8 @@ function renderObjects(){
         if(action==='done'){t.done=true;saveState();buildSidebar();renderObjects();}
         else if(action==='undone'){t.done=false;saveState();buildSidebar();renderObjects();}
         else if(action==='postpone') openPostponeModal(oId,n);
+        else if(action==='edit') openEditTaskModal(oId,n);
+        else if(action==='log') openTaskLog(oId,n);
         else if(action==='comment') openCommentModal(oId,n);
         else if(action==='del'){if(confirm('Удалить задачу?')){o.tasks=o.tasks.filter(x=>x.n!==n);o.tasks.forEach((x,i)=>x.n=i+1);saveState();buildFilters();buildSidebar();renderObjects();}}
       });
@@ -2330,9 +2512,9 @@ function renderObjects(){
     return any;
   }
 
-  renderGroup(state.objects.filter(o=>!o.stop&&!o.org),null);
-  renderGroup(state.objects.filter(o=>o.stop),'Объекты на стопе');
-  renderGroup(state.objects.filter(o=>o.org),'Прочее');
+  renderGroup(state.objects.filter(o=>!o.stop&&!o.org&&!o.archived),null);
+  renderGroup(state.objects.filter(o=>o.stop&&!o.archived),'Объекты на стопе');
+  renderGroup(state.objects.filter(o=>o.org&&!o.archived),'Прочее');
 
   if(!area.children.length)
     area.innerHTML='<div class="empty-state"><div class="es-icon">🔍</div>Ничего не найдено</div>';
@@ -2384,12 +2566,14 @@ function openTaskModal(objId){
 function saveTask(){
   const txt=document.getElementById('mTask').value.trim();
   if(!txt){document.getElementById('mTask').classList.add('error');document.getElementById('mTask').focus();setTimeout(()=>document.getElementById('mTask').classList.remove('error'),1800);return;}
-  const who=document.getElementById('mWho').value.trim();
+  const who=normalizeName(document.getElementById('mWho').value);
   const date=document.getElementById('mDate').value.trim()||null;
   const comment=document.getElementById('mComment').value.trim();
   const obj=getObj(_taskObjId);
   const maxN=obj.tasks.length?Math.max(...obj.tasks.map(t=>t.n)):0;
-  obj.tasks.push({n:maxN+1,task:txt,who,date,done:false,comment,postpones:0});
+  const nt={n:maxN+1,task:txt,who,date,done:false,comment,postpones:0,log:[],logInit:true};
+  if(date) nt.log.push({at:new Date().toISOString(),field:'date',from:null,to:date});
+  obj.tasks.push(nt);
   saveState();closeModal('overlayTask');buildFilters();buildSidebar();renderObjects();
 }
 
@@ -2407,6 +2591,142 @@ function saveComment(){
   const t=getObj(objId).tasks.find(x=>x.n===n);
   t.comment=document.getElementById('mCommentText').value.trim();
   saveState();closeModal('overlayComment');renderObjects();
+}
+
+// Edit task (название / исполнитель / срок / комментарий)
+let _editKey=null;
+let _logKey=null;
+
+function openEditTaskModal(objId,n){
+  if(state.locked) return;
+  const obj=getObj(objId);
+  const t=obj.tasks.find(x=>x.n===n);
+  if(!t) return;
+  _editKey={objId,n};
+  document.getElementById('mEditObjName').textContent=obj.name+' · задача №'+t.n;
+  document.getElementById('mEditTask').value=t.task||'';
+  document.getElementById('mEditWho').value=t.who||'';
+  document.getElementById('mEditDate').value=t.date||'';
+  document.getElementById('mEditComment').value=t.comment||'';
+  document.getElementById('mEditTask').classList.remove('error');
+  document.getElementById('whoListEdit').innerHTML=getAllAssignees().map(a=>`<option value="${a}">`).join('');
+  document.getElementById('mEditHistLink').onclick=()=>{closeModal('overlayEditTask');openTaskLog(objId,n);};
+  document.getElementById('overlayEditTask').classList.add('open');
+  setTimeout(()=>document.getElementById('mEditTask').focus(),60);
+}
+
+function saveEditTask(){
+  if(!_editKey) return;
+  const txt=document.getElementById('mEditTask').value.trim();
+  const el=document.getElementById('mEditTask');
+  if(!txt){el.classList.add('error');el.focus();setTimeout(()=>el.classList.remove('error'),1800);return;}
+  const {objId,n}=_editKey;
+  const t=getObj(objId).tasks.find(x=>x.n===n);
+  if(!t){closeModal('overlayEditTask');return;}
+  const who=normalizeName(document.getElementById('mEditWho').value);
+  const date=document.getElementById('mEditDate').value.trim()||null;
+
+  // Журналим только поля, которые действительно изменились
+  logChange(t,'task',t.task,txt);
+  logChange(t,'who',t.who,who);
+  const dateChanged=logChange(t,'date',t.date,date);
+
+  t.task=txt; t.who=who; t.date=date;
+  t.comment=document.getElementById('mEditComment').value.trim();
+  // Срок, изменённый через правку, тоже считается переносом —
+  // иначе счётчик разошёлся бы с историей.
+  if(dateChanged) t.postpones=(t.postpones||0)+1;
+
+  saveState();closeModal('overlayEditTask');buildFilters();buildSidebar();renderObjects();
+}
+
+// История изменений задачи
+function fmtLogWhen(iso){
+  if(!iso) return '—';
+  const d=new Date(iso);
+  if(isNaN(d)) return '—';
+  const p=x=>String(x).padStart(2,'0');
+  return `${p(d.getDate())}.${p(d.getMonth()+1)}.${String(d.getFullYear()).slice(2)} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+const LOG_FIELD_LABEL={task:'Название',who:'Исполнитель',date:'Срок'};
+const LOG_FIELD_CLASS={task:'f-task',who:'f-who',date:'f-date'};
+
+function openTaskLog(objId,n){
+  const obj=getObj(objId);
+  const t=obj.tasks.find(x=>x.n===n);
+  if(!t) return;
+  _logKey={objId,n};
+  document.getElementById('mLogTaskName').textContent=obj.name+' · '+t.task;
+
+  const log=Array.isArray(t.log)?t.log:[];
+  const dateLog=log.filter(L=>L.field==='date');
+  const firstDate=dateLog.length?(dateLog[0].from||dateLog[0].to):t.date;
+
+  // Сводка
+  const sum=document.getElementById('mLogSummary');
+  sum.innerHTML='';
+  const items=[
+    ['Первоначальный срок',firstDate||'не задавался'],
+    ['Текущий срок',t.date||'не задан'],
+    ['Переносов срока',String(t.postpones||0)],
+    ['Всего изменений',String(log.filter(L=>!L.seed).length)]
+  ];
+  items.forEach(([lbl,val])=>{
+    const it=document.createElement('div'); it.className='log-sum-item';
+    const l=document.createElement('div'); l.className='log-sum-lbl'; l.textContent=lbl;
+    const v=document.createElement('div'); v.className='log-sum-val'; v.textContent=val;
+    it.append(l,v); sum.appendChild(it);
+  });
+
+  // Пояснение, если переносы были до появления журнала:
+  // иначе «переносов 2, изменений 0» выглядит как ошибка.
+  const recorded=log.filter(L=>L.field==='date'&&!L.seed).length;
+  const missing=(t.postpones||0)-recorded;
+  const note=document.getElementById('mLogNote');
+  if(missing>0){
+    note.textContent='Из них '+missing+' перенос(ов) сделаны до внедрения журнала — подробности по ним не сохранились. Все дальнейшие изменения записываются полностью.';
+    note.style.display='';
+  } else {
+    note.style.display='none';
+  }
+
+  // Список изменений
+  const list=document.getElementById('mLogList');
+  list.innerHTML='';
+  if(!log.length){
+    const e=document.createElement('div'); e.className='log-empty';
+    e.textContent='Изменений не было. История начнёт накапливаться с первой правки.';
+    list.appendChild(e);
+  } else {
+    log.forEach(L=>{
+      const row=document.createElement('div');
+      row.className='log-row'+(L.seed?' seed':'');
+      const when=document.createElement('div'); when.className='log-when';
+      when.textContent=L.seed?'до журнала':fmtLogWhen(L.at);
+      const f=document.createElement('div');
+      f.className='log-field '+(LOG_FIELD_CLASS[L.field]||'f-date');
+      f.textContent=LOG_FIELD_LABEL[L.field]||L.field;
+      const v=document.createElement('div');
+      if(L.seed){
+        const nv=document.createElement('span'); nv.className='log-val-new';
+        nv.textContent=L.to||'—';
+        v.append(nv);
+        const note=document.createElement('span'); note.className='log-val-arrow';
+        note.textContent=' (первоначальный)';
+        v.append(note);
+      } else {
+        const ov=document.createElement('span'); ov.className='log-val-old';
+        ov.textContent=L.from||'не задано';
+        const ar=document.createElement('span'); ar.className='log-val-arrow'; ar.textContent='→';
+        const nv=document.createElement('span'); nv.className='log-val-new';
+        nv.textContent=L.to||'не задано';
+        v.append(ov,ar,nv);
+      }
+      row.append(when,f,v);
+      list.appendChild(row);
+    });
+  }
+  document.getElementById('overlayTaskLog').classList.add('open');
 }
 
 // Postpone
@@ -2438,6 +2758,7 @@ function savePostpone(){
   if(!date){alert('Укажите новый срок');return;}
   const{objId,n}=_postponeKey;
   const t=getObj(objId).tasks.find(x=>x.n===n);
+  logChange(t,'date',t.date,date);
   t.date=date;
   t.postpones=(t.postpones||0)+1;
   saveState();closeModal('overlayPostpone');renderObjects();buildSidebar();
@@ -2457,8 +2778,8 @@ function openRolesModal(objId){
 }
 function saveRoles(){
   const obj=getObj(_rolesObjId);
-  obj.gip=document.getElementById('mGip').value.trim();
-  obj.rp=document.getElementById('mRp').value.trim();
+  obj.gip=normalizeName(document.getElementById('mGip').value);
+  obj.rp=normalizeName(document.getElementById('mRp').value);
   saveState();closeModal('overlayRoles');renderObjects();buildSidebar();
 }
 
@@ -2476,8 +2797,8 @@ function openAddObjModal(){
 function saveNewObject(){
   const name=document.getElementById('mObjName').value.trim();
   if(!name){document.getElementById('mObjName').classList.add('error');document.getElementById('mObjName').focus();setTimeout(()=>document.getElementById('mObjName').classList.remove('error'),1800);return;}
-  const gip=document.getElementById('mObjGip').value.trim();
-  const rp=document.getElementById('mObjRp').value.trim();
+  const gip=normalizeName(document.getElementById('mObjGip').value);
+  const rp=normalizeName(document.getElementById('mObjRp').value);
   const type=document.getElementById('mObjType').value;
   const maxId=Math.max(...state.objects.map(o=>o.id));
   const obj={id:maxId+1,name,gip,rp,stop:type==='stop',org:type==='org',tasks:[]};
@@ -2514,6 +2835,7 @@ function createNewProto(){
   if(!state.locked){const snap=JSON.parse(JSON.stringify(state));history.push(snap);saveHistory();}
   // Carry over objects, remove done tasks, reset postpones counter for clean slate
   const newObjs=JSON.parse(JSON.stringify(state.objects)).map(o=>{
+    if(o.archived) return o;
     o.tasks=o.tasks.filter(t=>!t.done);
     o.tasks.forEach((t,i)=>t.n=i+1);
     return o;
@@ -2531,10 +2853,13 @@ function printPDF(){window.print();}
 // ══════════════════════════════════════════════
 //  KEYBOARD & ESC
 // ══════════════════════════════════════════════
-const allOverlays=['overlayTask','overlayComment','overlayPostpone','overlayRoles','overlayAddObj','overlayNewProto','overlayLock','overlayHistoryView'];
+const allOverlays=['overlayTask','overlayEditTask','overlayTaskLog','overlayComment','overlayPostpone','overlayRoles','overlayAddObj','overlayNewProto','overlayLock','overlayHistoryView','overlayArchive'];
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape') allOverlays.forEach(id=>closeModal(id));
-  if(e.key==='Enter'&&document.getElementById('overlayTask').classList.contains('open')&&document.activeElement.tagName!=='TEXTAREA') saveTask();
+  if(e.key==='Enter'&&document.activeElement.tagName!=='TEXTAREA'){
+    if(document.getElementById('overlayTask').classList.contains('open')) saveTask();
+    else if(document.getElementById('overlayEditTask').classList.contains('open')) saveEditTask();
+  }
 });
 allOverlays.forEach(id=>{
   document.getElementById(id).addEventListener('click',e=>{if(e.target===document.getElementById(id))closeModal(id);});
@@ -2547,7 +2872,71 @@ document.getElementById('btnNewProto').addEventListener('click',openNewProtoModa
 // ══════════════════════════════════════════════
 function installDateInput(id){var el=document.getElementById(id);if(!el||el.dataset.dateInstalled)return;el.dataset.dateInstalled='1';el.addEventListener('input',function(){var raw=el.value.replace(/[^0-9]/g,'').slice(0,6);var f=raw;if(raw.length>2)f=raw.slice(0,2)+'.'+raw.slice(2);if(raw.length>4)f=raw.slice(0,2)+'.'+raw.slice(2,4)+'.'+raw.slice(4);el.value=f;});var w=document.createElement('div');w.style.cssText='display:flex;gap:4px;align-items:stretch;';el.parentNode.insertBefore(w,el);w.appendChild(el);el.style.flex='1';var b=document.createElement('button');b.type='button';b.textContent=String.fromCodePoint(0x1F4C5);b.style.cssText='background:var(--bg);border:1px solid var(--border2);border-radius:6px;padding:0 10px;cursor:pointer;font-size:14px;';b.onclick=function(){openDatePicker(id);};w.appendChild(b);}
   function openDatePicker(targetId){var t=document.getElementById(targetId);if(!t)return;var cur='';var m=(t.value||'').match(/^([0-9]{1,2})\.([0-9]{1,2})\.([0-9]{2,4})$/);if(m){var y=m[3].length===2?'20'+m[3]:m[3];cur=y+'-'+m[2].padStart(2,'0')+'-'+m[1].padStart(2,'0');}var dp=document.createElement('input');dp.type='date';if(cur)dp.value=cur;dp.style.cssText='position:fixed;left:0;top:0;opacity:0;width:1px;height:1px;';dp.onchange=function(){if(dp.value){var p=dp.value.split('-');t.value=p[2]+'.'+p[1]+'.'+p[0].slice(2);t.dispatchEvent(new Event('input',{bubbles:true}));}dp.remove();};document.body.appendChild(dp);if(dp.showPicker){try{dp.showPicker();}catch(e){dp.click();}}else{dp.click();}}
-  ['mDate','mPostponeDate'].forEach(installDateInput);
+  ['mDate','mPostponeDate','mEditDate'].forEach(installDateInput);
+
+// ══════════════════════════════════════════════
+//  ARCHIVE
+// ══════════════════════════════════════════════
+function canArchive(o){return o.tasks.length>0 && o.tasks.every(t=>t.done);}
+function archiveObj(id){
+  const o=getObj(id);
+  if(!o) return;
+  if(!canArchive(o)){alert('Сначала завершите все задачи объекта');return;}
+  o.archived=true;
+  saveState(); buildSidebar(); buildFilters(); renderObjects();
+}
+function unarchiveObj(id){
+  const o=getObj(id);
+  if(!o) return;
+  o.archived=false;
+  saveState(); buildSidebar(); buildFilters(); renderObjects();
+  openArchiveView();
+}
+function closeArchiveView(){document.getElementById('overlayArchive').classList.remove('open');}
+function openArchiveView(){
+  const arch=state.objects.filter(o=>o.archived);
+  const L=document.getElementById('archiveList');
+  L.innerHTML='';
+  if(!arch.length){
+    const empty=document.createElement('div');
+    empty.style.cssText='padding:30px;text-align:center;color:var(--text3);font-size:13px;';
+    empty.textContent='Архив пуст';
+    L.appendChild(empty);
+  } else {
+    arch.forEach(o=>{
+      const card=document.createElement('div');
+      card.className='hv-obj-card';
+      const head=document.createElement('div');
+      head.className='hv-obj-head';
+      head.style.cssText='display:flex;align-items:center;gap:10px;';
+      const nm=document.createElement('div'); nm.className='hv-obj-name'; nm.style.flex='1'; nm.textContent=o.name;
+      const btn=document.createElement('button'); btn.className='bha'; btn.style.cssText='padding:4px 10px;cursor:pointer;'; btn.textContent='↩ Восстановить';
+      btn.onclick=()=>unarchiveObj(o.id);
+      head.append(nm,btn);
+      card.appendChild(head);
+      if(o.tasks && o.tasks.length){
+        o.tasks.forEach(t=>{
+          const row=document.createElement('div');
+          row.className='hv-task-row'+(t.done?' done-row':'');
+          const n=document.createElement('div'); n.className='hv-task-n'; n.textContent=t.n;
+          const txt=document.createElement('div'); txt.className='hv-task-text';
+          if(t.done){const s=document.createElement('s');s.textContent=t.task;txt.appendChild(s);}
+          else txt.textContent=t.task;
+          if(t.comment){const c=document.createElement('div');c.style.cssText='font-size:11px;color:var(--text3);font-style:italic;margin-top:2px';c.textContent='💬 '+t.comment;txt.appendChild(c);}
+          const who=document.createElement('div'); who.className='hv-task-who'; who.textContent=t.who||'—';
+          const dt=document.createElement('div'); dt.className='hv-task-date'; dt.textContent=t.date||'—';
+          row.append(n,txt,who,dt);
+          card.appendChild(row);
+        });
+      } else {
+        const empty=document.createElement('div'); empty.className='hv-empty-msg'; empty.textContent='Нет задач'; card.appendChild(empty);
+      }
+      L.appendChild(card);
+    });
+  }
+  document.getElementById('overlayArchive').classList.add('open');
+}
+
    initApp();
 
 
